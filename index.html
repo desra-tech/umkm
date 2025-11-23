@@ -1,11 +1,359 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UMKM Financial System</title>
-    <?!= include('Styles'); ?>
+    <title>UMKM Financial System - Demo</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f6fa;
+        color: #333;
+        overflow-x: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 260px;
+        height: 100vh;
+        background: #2c3e50;
+        color: white;
+        overflow-y: auto;
+        transition: transform 0.3s ease;
+        z-index: 1000;
+    }
+
+    .sidebar-header {
+        padding: 20px;
+        background: #34495e;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sidebar-header h2 {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .btn-toggle {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        display: none;
+    }
+
+    .user-info {
+        padding: 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        background: #3498db;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .user-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-details strong {
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+
+    .user-details span {
+        font-size: 12px;
+        color: #95a5a6;
+    }
+
+    .sidebar-menu {
+        padding: 10px 0;
+    }
+
+    .menu-section {
+        margin-bottom: 5px;
+    }
+
+    .menu-title {
+        padding: 12px 20px 8px;
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #95a5a6;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: #ecf0f1;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .menu-item:hover {
+        background: rgba(255,255,255,0.1);
+        padding-left: 25px;
+    }
+
+    .menu-item.active {
+        background: #3498db;
+        border-left: 4px solid #fff;
+        padding-left: 16px;
+    }
+
+    .menu-icon {
+        margin-right: 12px;
+        font-size: 18px;
+    }
+
+    .menu-text {
+        font-size: 14px;
+    }
+
+    /* Main Content */
+    .main-content {
+        margin-left: 260px;
+        min-height: 100vh;
+        transition: margin-left 0.3s ease;
+    }
+
+    .content-header {
+        background: white;
+        padding: 20px 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .content-header h1 {
+        font-size: 24px;
+        color: #2c3e50;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .content-body {
+        padding: 30px;
+    }
+
+    .content-section {
+        display: none;
+    }
+
+    .content-section.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Cards */
+    .card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .stat-card h3 {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 10px;
+    }
+
+    .stat-card .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .stat-card .stat-label {
+        font-size: 12px;
+        opacity: 0.8;
+    }
+
+    .notification-item {
+        text-align: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .notification-item h3 {
+        font-size: 14px;
+        color: #666;
+        margin: 10px 0;
+    }
+
+    /* Alert */
+    .alert {
+        padding: 12px 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        display: none;
+    }
+
+    .alert-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+
+    .demo-notice {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Loading */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        flex-direction: column;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .loading-overlay p {
+        color: white;
+        margin-top: 15px;
+        font-size: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .main-content {
+            margin-left: 0;
+        }
+
+        .btn-toggle {
+            display: block;
+        }
+
+        .card-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .content-header {
+            padding: 15px 20px;
+        }
+
+        .content-header h1 {
+            font-size: 20px;
+        }
+
+        .content-body {
+            padding: 20px;
+        }
+    }
+    </style>
 </head>
 <body>
     <!-- Sidebar -->
@@ -15,11 +363,11 @@
             <button class="btn-toggle" onclick="toggleSidebar()">☰</button>
         </div>
 
-        <div class="user-info" id="userInfo">
+        <div class="user-info">
             <div class="user-avatar">👤</div>
             <div class="user-details">
-                <strong id="userName">Loading...</strong>
-                <span id="userRole">User</span>
+                <strong id="userName">Demo User</strong>
+                <span id="userRole">Admin</span>
             </div>
         </div>
 
@@ -32,7 +380,7 @@
                 </a>
             </div>
 
-            <div class="menu-section" id="menuTransaksi">
+            <div class="menu-section">
                 <div class="menu-title">Transaksi</div>
                 <a href="#" class="menu-item" onclick="showSection('penerimaan')">
                     <span class="menu-icon">💰</span>
@@ -42,13 +390,13 @@
                     <span class="menu-icon">💸</span>
                     <span class="menu-text">Pengeluaran</span>
                 </a>
-                <a href="#" class="menu-item" id="menuModal" onclick="showSection('modal')">
+                <a href="#" class="menu-item" onclick="showSection('modal')">
                     <span class="menu-icon">💼</span>
                     <span class="menu-text">Modal</span>
                 </a>
             </div>
 
-            <div class="menu-section" id="menuMasterData">
+            <div class="menu-section">
                 <div class="menu-title">Master Data</div>
                 <a href="#" class="menu-item" onclick="showSection('accounts')">
                     <span class="menu-icon">📋</span>
@@ -104,7 +452,7 @@
                 </a>
             </div>
 
-            <div class="menu-section" id="menuAdmin">
+            <div class="menu-section">
                 <div class="menu-title">Administrasi</div>
                 <a href="#" class="menu-item" onclick="showSection('users')">
                     <span class="menu-icon">👥</span>
@@ -113,13 +461,6 @@
                 <a href="#" class="menu-item" onclick="showSection('settings')">
                     <span class="menu-icon">⚙️</span>
                     <span class="menu-text">Pengaturan</span>
-                </a>
-            </div>
-
-            <div class="menu-section">
-                <a href="#" class="menu-item" onclick="handleLogout()">
-                    <span class="menu-icon">🚪</span>
-                    <span class="menu-text">Logout</span>
                 </a>
             </div>
         </nav>
@@ -137,76 +478,247 @@
         <div class="content-body">
             <!-- Dashboard Section -->
             <div id="section-dashboard" class="content-section active">
-                <?!= include('Dashboard'); ?>
+                <div class="demo-notice">
+                    <strong>🌟 Mode Demo</strong> - Ini adalah tampilan demo dengan data contoh. Untuk fungsi lengkap, silakan deploy ke Google Apps Script.
+                </div>
+
+                <div id="dashboardAlert" class="alert"></div>
+
+                <!-- Summary Cards -->
+                <div class="card-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <h3>Pendapatan Bulan Ini</h3>
+                        <div class="stat-value" id="totalRevenue">Rp 0</div>
+                        <div class="stat-label">Total pendapatan periode berjalan</div>
+                    </div>
+
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <h3>Pengeluaran Bulan Ini</h3>
+                        <div class="stat-value" id="totalExpenses">Rp 0</div>
+                        <div class="stat-label">Total pengeluaran periode berjalan</div>
+                    </div>
+
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <h3>Laba Bersih</h3>
+                        <div class="stat-value" id="netProfit">Rp 0</div>
+                        <div class="stat-label">Laba bersih periode berjalan</div>
+                    </div>
+
+                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <h3>Saldo Kas</h3>
+                        <div class="stat-value" id="cashBalance">Rp 0</div>
+                        <div class="stat-label">Saldo kas dan bank saat ini</div>
+                    </div>
+                </div>
+
+                <!-- Financial Position -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Posisi Keuangan</h2>
+                    </div>
+                    <div class="card-grid">
+                        <div>
+                            <h3 style="color: #3498db; margin-bottom: 15px;">Total Aset</h3>
+                            <p style="font-size: 24px; font-weight: 600;" id="totalAssets">Rp 0</p>
+                        </div>
+                        <div>
+                            <h3 style="color: #e74c3c; margin-bottom: 15px;">Total Kewajiban</h3>
+                            <p style="font-size: 24px; font-weight: 600;" id="totalLiabilities">Rp 0</p>
+                        </div>
+                        <div>
+                            <h3 style="color: #2ecc71; margin-bottom: 15px;">Total Ekuitas</h3>
+                            <p style="font-size: 24px; font-weight: 600;" id="totalEquity">Rp 0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts and Notifications -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Pemberitahuan</h2>
+                    </div>
+                    <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                        <div class="notification-item">
+                            <div style="font-size: 32px;">📦</div>
+                            <h3>Stok Menipis</h3>
+                            <p id="lowStockCount" style="font-size: 24px; font-weight: 600; color: #e74c3c;">0</p>
+                            <p style="font-size: 12px; color: #666;">Produk dengan stok rendah</p>
+                        </div>
+                        <div class="notification-item">
+                            <div style="font-size: 32px;">📝</div>
+                            <h3>Piutang Tertunda</h3>
+                            <p id="pendingReceivables" style="font-size: 24px; font-weight: 600; color: #f39c12;">Rp 0</p>
+                            <p style="font-size: 12px; color: #666;">Total piutang belum dibayar</p>
+                        </div>
+                        <div class="notification-item">
+                            <div style="font-size: 32px;">📄</div>
+                            <h3>Utang Tertunda</h3>
+                            <p id="pendingPayables" style="font-size: 24px; font-weight: 600; color: #3498db;">Rp 0</p>
+                            <p style="font-size: 12px; color: #666;">Total utang belum dibayar</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Transaction Sections -->
+            <!-- Other sections (placeholders) -->
             <div id="section-penerimaan" class="content-section">
-                <?!= include('Penerimaan'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Transaksi Penerimaan</h2>
+                    </div>
+                    <p>Halaman ini untuk mencatat transaksi penerimaan.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
             <div id="section-pengeluaran" class="content-section">
-                <?!= include('Pengeluaran'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Transaksi Pengeluaran</h2>
+                    </div>
+                    <p>Halaman ini untuk mencatat transaksi pengeluaran.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
             <div id="section-modal" class="content-section">
-                <?!= include('Modal'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Transaksi Modal</h2>
+                    </div>
+                    <p>Halaman ini untuk mencatat transaksi modal.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
-            <!-- Master Data Sections -->
             <div id="section-accounts" class="content-section">
-                <?!= include('Accounts'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Daftar Akun</h2>
+                    </div>
+                    <p>Halaman ini menampilkan daftar akun keuangan.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
             <div id="section-customers" class="content-section">
-                <?!= include('Customers'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Daftar Pelanggan</h2>
+                    </div>
+                    <p>Halaman ini menampilkan daftar pelanggan.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
             <div id="section-suppliers" class="content-section">
-                <?!= include('Suppliers'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Daftar Pemasok</h2>
+                    </div>
+                    <p>Halaman ini menampilkan daftar pemasok.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
             <div id="section-products" class="content-section">
-                <?!= include('Products'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Daftar Barang/Jasa</h2>
+                    </div>
+                    <p>Halaman ini menampilkan daftar barang dan jasa.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
-            <!-- Report Sections -->
             <div id="section-profit-loss" class="content-section">
-                <?!= include('ProfitLoss'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Laporan Laba Rugi</h2>
+                    </div>
+                    <p>Halaman ini menampilkan laporan laba rugi.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
             <div id="section-balance-sheet" class="content-section">
-                <?!= include('BalanceSheet'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Laporan Neraca</h2>
+                    </div>
+                    <p>Halaman ini menampilkan laporan neraca.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
             <div id="section-cash-flow" class="content-section">
-                <?!= include('CashFlow'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Laporan Arus Kas</h2>
+                    </div>
+                    <p>Halaman ini menampilkan laporan arus kas.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
-            <!-- Business Sections -->
             <div id="section-pos" class="content-section">
-                <?!= include('POS'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Kasir (POS)</h2>
+                    </div>
+                    <p>Halaman ini untuk Point of Sale.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
             <div id="section-inventory" class="content-section">
-                <?!= include('Inventory'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Manajemen Persediaan</h2>
+                    </div>
+                    <p>Halaman ini untuk mengelola persediaan barang.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
             <div id="section-receivables" class="content-section">
-                <?!= include('Receivables'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Piutang Usaha</h2>
+                    </div>
+                    <p>Halaman ini menampilkan piutang usaha.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
             <div id="section-payables" class="content-section">
-                <?!= include('Payables'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Utang Usaha</h2>
+                    </div>
+                    <p>Halaman ini menampilkan utang usaha.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
-            <!-- Admin Sections -->
             <div id="section-users" class="content-section">
-                <?!= include('Users'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Kelola User</h2>
+                    </div>
+                    <p>Halaman ini untuk mengelola pengguna.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
 
             <div id="section-settings" class="content-section">
-                <?!= include('Settings'); ?>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Pengaturan</h2>
+                    </div>
+                    <p>Halaman ini untuk pengaturan aplikasi.</p>
+                    <p style="margin-top: 10px; color: #666; font-style: italic;">📝 Fitur lengkap tersedia di Google Apps Script</p>
+                </div>
             </div>
         </div>
     </div>
@@ -217,6 +729,159 @@
         <p>Memuat...</p>
     </div>
 
-    <?!= include('Scripts'); ?>
+    <script>
+    // Initialize app on load
+    window.onload = function() {
+        updateCurrentDate();
+        setInterval(updateCurrentDate, 60000); // Update every minute
+        loadDemoData();
+    };
+
+    // Update current date display
+    function updateCurrentDate() {
+        const now = new Date();
+        const options = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        };
+        document.getElementById('currentDate').textContent =
+            now.toLocaleDateString('id-ID', options);
+    }
+
+    // Load demo data
+    function loadDemoData() {
+        // Simulate loading
+        showLoading();
+        setTimeout(() => {
+            const demoData = {
+                currentMonth: {
+                    revenue: 125750000,
+                    expenses: 87500000,
+                    netProfit: 38250000
+                },
+                financial: {
+                    totalAssets: 456000000,
+                    totalLiabilities: 125000000,
+                    totalEquity: 331000000,
+                    cashBalance: 87500000
+                },
+                operations: {
+                    lowStockCount: 5,
+                    pendingReceivables: 23500000,
+                    pendingPayables: 15750000
+                }
+            };
+            updateDashboard(demoData);
+            hideLoading();
+        }, 1000);
+    }
+
+    // Update dashboard with data
+    function updateDashboard(data) {
+        try {
+            // Update revenue and expenses
+            document.getElementById('totalRevenue').textContent = formatCurrency(data.currentMonth.revenue);
+            document.getElementById('totalExpenses').textContent = formatCurrency(data.currentMonth.expenses);
+            document.getElementById('netProfit').textContent = formatCurrency(data.currentMonth.netProfit);
+
+            // Update financial position
+            document.getElementById('totalAssets').textContent = formatCurrency(data.financial.totalAssets);
+            document.getElementById('totalLiabilities').textContent = formatCurrency(data.financial.totalLiabilities);
+            document.getElementById('totalEquity').textContent = formatCurrency(data.financial.totalEquity);
+            document.getElementById('cashBalance').textContent = formatCurrency(data.financial.cashBalance);
+
+            // Update notifications
+            document.getElementById('lowStockCount').textContent = data.operations.lowStockCount;
+            document.getElementById('pendingReceivables').textContent = formatCurrency(data.operations.pendingReceivables);
+            document.getElementById('pendingPayables').textContent = formatCurrency(data.operations.pendingPayables);
+
+            // Show alerts if needed
+            if (data.operations.lowStockCount > 0) {
+                const alert = document.getElementById('dashboardAlert');
+                alert.className = 'alert alert-warning';
+                alert.textContent = `⚠️ Perhatian: ${data.operations.lowStockCount} produk memiliki stok yang menipis!`;
+                alert.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error updating dashboard:', error);
+        }
+    }
+
+    // Navigation
+    function showSection(sectionName) {
+        // Hide all sections
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Remove active class from all menu items
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // Show selected section
+        const selectedSection = document.getElementById('section-' + sectionName);
+        if (selectedSection) {
+            selectedSection.classList.add('active');
+        }
+
+        // Update active menu item
+        event.target.closest('.menu-item').classList.add('active');
+
+        // Update page title
+        const titles = {
+            'dashboard': 'Dashboard',
+            'penerimaan': 'Transaksi Penerimaan',
+            'pengeluaran': 'Transaksi Pengeluaran',
+            'modal': 'Transaksi Modal',
+            'accounts': 'Daftar Akun',
+            'customers': 'Daftar Pelanggan',
+            'suppliers': 'Daftar Pemasok',
+            'products': 'Daftar Barang/Jasa',
+            'profit-loss': 'Laporan Laba Rugi',
+            'balance-sheet': 'Laporan Neraca',
+            'cash-flow': 'Laporan Arus Kas',
+            'pos': 'Point of Sale (Kasir)',
+            'inventory': 'Manajemen Persediaan',
+            'receivables': 'Piutang Usaha',
+            'payables': 'Utang Usaha',
+            'users': 'Kelola User',
+            'settings': 'Pengaturan'
+        };
+        document.getElementById('pageTitle').textContent = titles[sectionName] || 'Dashboard';
+
+        // Close sidebar on mobile
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebar').classList.remove('active');
+        }
+    }
+
+    // Toggle sidebar
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    // Loading overlay
+    function showLoading() {
+        document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    function hideLoading() {
+        document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    // Format currency
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(amount);
+    }
+    </script>
 </body>
 </html>
