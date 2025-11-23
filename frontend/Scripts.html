@@ -1,0 +1,362 @@
+<script>
+    // Global variables
+    let currentUser = null;
+    let csrfToken = null;
+
+    // Initialize app on load
+    window.onload = function() {
+        loadCurrentUser();
+        updateCurrentDate();
+        setInterval(updateCurrentDate, 60000); // Update every minute
+    };
+
+    // Load current user info
+    function loadCurrentUser() {
+        showLoading();
+        google.script.run
+            .withSuccessHandler(handleUserLoaded)
+            .withFailureHandler(handleError)
+            .getCurrentUser();
+    }
+
+    function handleUserLoaded(response) {
+        hideLoading();
+        if (response) {
+            currentUser = response;
+            document.getElementById('userName').textContent = response.fullName;
+            document.getElementById('userRole').textContent = response.role;
+
+            // Hide admin menu if user is not admin
+            if (response.role !== 'Admin') {
+                document.getElementById('menuAdmin').style.display = 'none';
+                document.getElementById('menuModal').style.display = 'none';
+                document.getElementById('menuMasterData').style.display = 'none';
+            }
+
+            // Load dashboard data
+            loadDashboard();
+        }
+    }
+
+    // Update current date display
+    function updateCurrentDate() {
+        const now = new Date();
+        const options = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        };
+        document.getElementById('currentDate').textContent =
+            now.toLocaleDateString('id-ID', options);
+    }
+
+    // Navigation
+    function showSection(sectionName) {
+        // Hide all sections
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Remove active class from all menu items
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // Show selected section
+        const selectedSection = document.getElementById('section-' + sectionName);
+        if (selectedSection) {
+            selectedSection.classList.add('active');
+        }
+
+        // Update active menu item
+        event.target.closest('.menu-item').classList.add('active');
+
+        // Update page title
+        const titles = {
+            'dashboard': 'Dashboard',
+            'penerimaan': 'Transaksi Penerimaan',
+            'pengeluaran': 'Transaksi Pengeluaran',
+            'modal': 'Transaksi Modal',
+            'accounts': 'Daftar Akun',
+            'customers': 'Daftar Pelanggan',
+            'suppliers': 'Daftar Pemasok',
+            'products': 'Daftar Barang/Jasa',
+            'profit-loss': 'Laporan Laba Rugi',
+            'balance-sheet': 'Laporan Neraca',
+            'cash-flow': 'Laporan Arus Kas',
+            'pos': 'Point of Sale (Kasir)',
+            'inventory': 'Manajemen Persediaan',
+            'receivables': 'Piutang Usaha',
+            'payables': 'Utang Usaha',
+            'users': 'Kelola User',
+            'settings': 'Pengaturan'
+        };
+        document.getElementById('pageTitle').textContent = titles[sectionName] || 'Dashboard';
+
+        // Load section data
+        loadSectionData(sectionName);
+
+        // Close sidebar on mobile
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebar').classList.remove('active');
+        }
+    }
+
+    // Load section-specific data
+    function loadSectionData(sectionName) {
+        switch(sectionName) {
+            case 'dashboard':
+                loadDashboard();
+                break;
+            case 'accounts':
+                loadAccounts();
+                break;
+            case 'customers':
+                loadCustomers();
+                break;
+            case 'suppliers':
+                loadSuppliers();
+                break;
+            case 'products':
+                loadProducts();
+                break;
+            case 'receivables':
+                loadReceivables();
+                break;
+            case 'payables':
+                loadPayables();
+                break;
+            case 'inventory':
+                loadInventory();
+                break;
+            // Add more cases as needed
+        }
+    }
+
+    // Dashboard
+    function loadDashboard() {
+        showLoading();
+        google.script.run
+            .withSuccessHandler(handleDashboardLoaded)
+            .withFailureHandler(handleError)
+            .getDashboardSummary();
+    }
+
+    function handleDashboardLoaded(response) {
+        hideLoading();
+        if (response.success) {
+            const data = response.data;
+            // Update dashboard cards
+            // This will be implemented in Dashboard.html
+            if (typeof updateDashboard === 'function') {
+                updateDashboard(data);
+            }
+        }
+    }
+
+    // Logout
+    function handleLogout() {
+        if (confirm('Apakah Anda yakin ingin logout?')) {
+            showLoading();
+            google.script.run
+                .withSuccessHandler(handleLogoutSuccess)
+                .withFailureHandler(handleError)
+                .logout();
+        }
+    }
+
+    function handleLogoutSuccess(response) {
+        hideLoading();
+        if (response.success) {
+            window.location.reload();
+        }
+    }
+
+    // Toggle sidebar
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    // Loading overlay
+    function showLoading() {
+        document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    function hideLoading() {
+        document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    // Alert functions
+    function showAlert(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+        alertDiv.style.display = 'block';
+
+        const contentBody = document.querySelector('.content-body');
+        contentBody.insertBefore(alertDiv, contentBody.firstChild);
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            alertDiv.style.display = 'none';
+            alertDiv.remove();
+        }, 5000);
+    }
+
+    // Error handler
+    function handleError(error) {
+        hideLoading();
+        console.error('Error:', error);
+        showAlert('Terjadi kesalahan: ' + (error.message || error), 'error');
+    }
+
+    // Format currency
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(amount);
+    }
+
+    // Format date
+    function formatDate(date) {
+        if (typeof date === 'string') {
+            date = new Date(date);
+        }
+        return date.toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    // Format datetime
+    function formatDateTime(date) {
+        if (typeof date === 'string') {
+            date = new Date(date);
+        }
+        return date.toLocaleString('id-ID', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    // Modal functions
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+
+    // Form validation
+    function validateForm(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return false;
+
+        const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+        let isValid = true;
+
+        inputs.forEach(input => {
+            if (!input.value || input.value.trim() === '') {
+                input.style.borderColor = '#e74c3c';
+                isValid = false;
+            } else {
+                input.style.borderColor = '#e0e0e0';
+            }
+        });
+
+        if (!isValid) {
+            showAlert('Harap lengkapi semua field yang wajib diisi', 'warning');
+        }
+
+        return isValid;
+    }
+
+    // Clear form
+    function clearForm(formId) {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.reset();
+            // Reset border colors
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.style.borderColor = '#e0e0e0';
+            });
+        }
+    }
+
+    // Export to CSV
+    function exportTableToCSV(tableId, filename) {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+
+        let csv = [];
+        const rows = table.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('td, th');
+            const csvRow = [];
+            cols.forEach(col => {
+                csvRow.push('"' + col.textContent.replace(/"/g, '""') + '"');
+            });
+            csv.push(csvRow.join(','));
+        });
+
+        const csvContent = csv.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename || 'export.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Print
+    function printSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+
+        const printWindow = window.open('', '', 'height=600,width=800');
+        printWindow.document.write('<html><head><title>Print</title>');
+        printWindow.document.write('<style>');
+        printWindow.document.write('body { font-family: Arial, sans-serif; }');
+        printWindow.document.write('table { width: 100%; border-collapse: collapse; }');
+        printWindow.document.write('th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }');
+        printWindow.document.write('th { background-color: #f2f2f2; }');
+        printWindow.document.write('</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(section.innerHTML);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+
+    // Placeholder functions for data loading (to be implemented in specific sections)
+    function loadAccounts() { console.log('Loading accounts...'); }
+    function loadCustomers() { console.log('Loading customers...'); }
+    function loadSuppliers() { console.log('Loading suppliers...'); }
+    function loadProducts() { console.log('Loading products...'); }
+    function loadReceivables() { console.log('Loading receivables...'); }
+    function loadPayables() { console.log('Loading payables...'); }
+    function loadInventory() { console.log('Loading inventory...'); }
+</script>

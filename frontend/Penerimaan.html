@@ -1,0 +1,146 @@
+<div class="penerimaan-section">
+    <div id="alertPenerimaan" class="alert"></div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Form Transaksi Penerimaan</h2>
+        </div>
+        <form id="formPenerimaan" onsubmit="handleSubmitPenerimaan(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tanggal <span style="color: red;">*</span></label>
+                    <input type="date" id="penerimaanDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Tipe <span style="color: red;">*</span></label>
+                    <select id="penerimaanType" required>
+                        <option value="cash">Kas</option>
+                        <option value="bank">Bank</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Akun Pendapatan <span style="color: red;">*</span></label>
+                    <select id="penerimaanAccount" required>
+                        <option value="">Pilih Akun Pendapatan</option>
+                        <option value="4-1001">Pendapatan Penjualan</option>
+                        <option value="4-1002">Pendapatan Jasa</option>
+                        <option value="4-2001">Pendapatan Lain-lain</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah (Rp) <span style="color: red;">*</span></label>
+                    <input type="number" id="penerimaanAmount" min="0" step="0.01" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>No. Referensi</label>
+                <input type="text" id="penerimaanRefNo" placeholder="Contoh: INV-001">
+            </div>
+            <div class="form-group">
+                <label>Keterangan <span style="color: red;">*</span></label>
+                <textarea id="penerimaanDescription" rows="3" required placeholder="Masukkan keterangan transaksi"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">💾 Simpan Transaksi</button>
+                <button type="button" class="btn btn-secondary" onclick="clearForm('formPenerimaan')">🔄 Reset</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card mt-20">
+        <div class="card-header">
+            <h2 class="card-title">Riwayat Transaksi Penerimaan</h2>
+            <button class="btn btn-secondary btn-sm" onclick="loadPenerimaanHistory()">🔄 Refresh</button>
+        </div>
+        <div class="table-container">
+            <table id="tablePenerimaan">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>No. Referensi</th>
+                        <th>Akun</th>
+                        <th>Jumlah</th>
+                        <th>Keterangan</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="penerimaanTableBody">
+                    <tr>
+                        <td colspan="6" class="text-center">Memuat data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function handleSubmitPenerimaan(e) {
+            e.preventDefault();
+
+            if (!validateForm('formPenerimaan')) {
+                return;
+            }
+
+            const data = {
+                date: document.getElementById('penerimaanDate').value,
+                type: document.getElementById('penerimaanType').value,
+                incomeAccountCode: document.getElementById('penerimaanAccount').value,
+                amount: parseFloat(document.getElementById('penerimaanAmount').value),
+                referenceNo: document.getElementById('penerimaanRefNo').value,
+                description: document.getElementById('penerimaanDescription').value
+            };
+
+            showLoading();
+            google.script.run
+                .withSuccessHandler(handlePenerimaanSuccess)
+                .withFailureHandler(handleError)
+                .createIncome(data);
+        }
+
+        function handlePenerimaanSuccess(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert('Transaksi penerimaan berhasil disimpan', 'success');
+                clearForm('formPenerimaan');
+                loadPenerimaanHistory();
+            } else {
+                showAlert(response.message, 'error');
+            }
+        }
+
+        function loadPenerimaanHistory() {
+            showLoading();
+            google.script.run
+                .withSuccessHandler(displayPenerimaanHistory)
+                .withFailureHandler(handleError)
+                .getTransactions({ transactionType: 'Penerimaan' });
+        }
+
+        function displayPenerimaanHistory(response) {
+            hideLoading();
+            const tbody = document.getElementById('penerimaanTableBody');
+
+            if (response.success && response.data.length > 0) {
+                tbody.innerHTML = '';
+                response.data.forEach(item => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${formatDate(item.date)}</td>
+                        <td>${item.referenceNo || '-'}</td>
+                        <td>${item.accountCode}</td>
+                        <td>${formatCurrency(item.debit || item.credit)}</td>
+                        <td>${item.description}</td>
+                        <td><span class="badge badge-success">${item.status}</span></td>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">Tidak ada data</td></tr>';
+            }
+        }
+
+        // Set default date to today
+        document.getElementById('penerimaanDate').valueAsDate = new Date();
+    </script>
+</div>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMKM Financial System</title>
+    <?!= include('Styles'); ?>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>🏪 UMKM Financial</h2>
+            <button class="btn-toggle" onclick="toggleSidebar()">☰</button>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <div class="user-avatar">👤</div>
+            <div class="user-details">
+                <strong id="userName">Loading...</strong>
+                <span id="userRole">User</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-menu">
+            <div class="menu-section">
+                <div class="menu-title">Dashboard</div>
+                <a href="#" class="menu-item active" onclick="showSection('dashboard')">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Dashboard</span>
+                </a>
+            </div>
+
+            <div class="menu-section" id="menuTransaksi">
+                <div class="menu-title">Transaksi</div>
+                <a href="#" class="menu-item" onclick="showSection('penerimaan')">
+                    <span class="menu-icon">💰</span>
+                    <span class="menu-text">Penerimaan</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('pengeluaran')">
+                    <span class="menu-icon">💸</span>
+                    <span class="menu-text">Pengeluaran</span>
+                </a>
+                <a href="#" class="menu-item" id="menuModal" onclick="showSection('modal')">
+                    <span class="menu-icon">💼</span>
+                    <span class="menu-text">Modal</span>
+                </a>
+            </div>
+
+            <div class="menu-section" id="menuMasterData">
+                <div class="menu-title">Master Data</div>
+                <a href="#" class="menu-item" onclick="showSection('accounts')">
+                    <span class="menu-icon">📋</span>
+                    <span class="menu-text">Daftar Akun</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('customers')">
+                    <span class="menu-icon">👥</span>
+                    <span class="menu-text">Pelanggan</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('suppliers')">
+                    <span class="menu-icon">🏢</span>
+                    <span class="menu-text">Pemasok</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('products')">
+                    <span class="menu-icon">📦</span>
+                    <span class="menu-text">Barang/Jasa</span>
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">Laporan</div>
+                <a href="#" class="menu-item" onclick="showSection('profit-loss')">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Laba Rugi</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('balance-sheet')">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Neraca</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('cash-flow')">
+                    <span class="menu-icon">💵</span>
+                    <span class="menu-text">Arus Kas</span>
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">Pengelolaan Bisnis</div>
+                <a href="#" class="menu-item" onclick="showSection('pos')">
+                    <span class="menu-icon">🛒</span>
+                    <span class="menu-text">Kasir (POS)</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('inventory')">
+                    <span class="menu-icon">📦</span>
+                    <span class="menu-text">Persediaan</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('receivables')">
+                    <span class="menu-icon">📝</span>
+                    <span class="menu-text">Piutang</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('payables')">
+                    <span class="menu-icon">📄</span>
+                    <span class="menu-text">Utang</span>
+                </a>
+            </div>
+
+            <div class="menu-section" id="menuAdmin">
+                <div class="menu-title">Administrasi</div>
+                <a href="#" class="menu-item" onclick="showSection('users')">
+                    <span class="menu-icon">👥</span>
+                    <span class="menu-text">Kelola User</span>
+                </a>
+                <a href="#" class="menu-item" onclick="showSection('settings')">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Pengaturan</span>
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <a href="#" class="menu-item" onclick="handleLogout()">
+                    <span class="menu-icon">🚪</span>
+                    <span class="menu-text">Logout</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <div class="content-header">
+            <h1 id="pageTitle">Dashboard</h1>
+            <div class="header-actions">
+                <span id="currentDate"></span>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <!-- Dashboard Section -->
+            <div id="section-dashboard" class="content-section active">
+                <?!= include('Dashboard'); ?>
+            </div>
+
+            <!-- Transaction Sections -->
+            <div id="section-penerimaan" class="content-section">
+                <?!= include('Penerimaan'); ?>
+            </div>
+
+            <div id="section-pengeluaran" class="content-section">
+                <?!= include('Pengeluaran'); ?>
+            </div>
+
+            <div id="section-modal" class="content-section">
+                <?!= include('Modal'); ?>
+            </div>
+
+            <!-- Master Data Sections -->
+            <div id="section-accounts" class="content-section">
+                <?!= include('Accounts'); ?>
+            </div>
+
+            <div id="section-customers" class="content-section">
+                <?!= include('Customers'); ?>
+            </div>
+
+            <div id="section-suppliers" class="content-section">
+                <?!= include('Suppliers'); ?>
+            </div>
+
+            <div id="section-products" class="content-section">
+                <?!= include('Products'); ?>
+            </div>
+
+            <!-- Report Sections -->
+            <div id="section-profit-loss" class="content-section">
+                <?!= include('ProfitLoss'); ?>
+            </div>
+
+            <div id="section-balance-sheet" class="content-section">
+                <?!= include('BalanceSheet'); ?>
+            </div>
+
+            <div id="section-cash-flow" class="content-section">
+                <?!= include('CashFlow'); ?>
+            </div>
+
+            <!-- Business Sections -->
+            <div id="section-pos" class="content-section">
+                <?!= include('POS'); ?>
+            </div>
+
+            <div id="section-inventory" class="content-section">
+                <?!= include('Inventory'); ?>
+            </div>
+
+            <div id="section-receivables" class="content-section">
+                <?!= include('Receivables'); ?>
+            </div>
+
+            <div id="section-payables" class="content-section">
+                <?!= include('Payables'); ?>
+            </div>
+
+            <!-- Admin Sections -->
+            <div id="section-users" class="content-section">
+                <?!= include('Users'); ?>
+            </div>
+
+            <div id="section-settings" class="content-section">
+                <?!= include('Settings'); ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Memuat...</p>
+    </div>
+
+    <?!= include('Scripts'); ?>
+</body>
+</html>

@@ -1,0 +1,250 @@
+{
+  "spreadsheet_name": "UMKM Financial System Database",
+  "sheets": [
+    {
+      "name": "Users",
+      "description": "Menyimpan data pengguna dan level akses",
+      "columns": [
+        "User ID",
+        "Username",
+        "Password Hash",
+        "Salt",
+        "Full Name",
+        "Role",
+        "Email",
+        "Phone",
+        "Status",
+        "Created Date",
+        "Last Login"
+      ]
+    },
+    {
+      "name": "Accounts",
+      "description": "Chart of Accounts - Daftar akun untuk pembukuan",
+      "columns": [
+        "Account Code",
+        "Account Name",
+        "Account Type",
+        "Category",
+        "Parent Account",
+        "Description",
+        "Status",
+        "Created Date"
+      ]
+    },
+    {
+      "name": "Customers",
+      "description": "Daftar pelanggan",
+      "columns": [
+        "Customer ID",
+        "Customer Name",
+        "Contact Person",
+        "Phone",
+        "Email",
+        "Address",
+        "City",
+        "Tax ID",
+        "Credit Limit",
+        "Status",
+        "Created Date"
+      ]
+    },
+    {
+      "name": "Suppliers",
+      "description": "Daftar pemasok",
+      "columns": [
+        "Supplier ID",
+        "Supplier Name",
+        "Contact Person",
+        "Phone",
+        "Email",
+        "Address",
+        "City",
+        "Tax ID",
+        "Payment Terms",
+        "Status",
+        "Created Date"
+      ]
+    },
+    {
+      "name": "Products",
+      "description": "Daftar barang/jasa",
+      "columns": [
+        "Product ID",
+        "Product Code",
+        "Product Name",
+        "Category",
+        "Unit",
+        "Purchase Price",
+        "Selling Price",
+        "Stock",
+        "Min Stock",
+        "Description",
+        "Status",
+        "Created Date"
+      ]
+    },
+    {
+      "name": "Transactions",
+      "description": "Transaksi keuangan utama",
+      "columns": [
+        "Transaction ID",
+        "Date",
+        "Transaction Type",
+        "Reference No",
+        "Account Code",
+        "Debit",
+        "Credit",
+        "Description",
+        "Partner ID",
+        "Partner Type",
+        "Created By",
+        "Created Date",
+        "Status"
+      ]
+    },
+    {
+      "name": "Sales",
+      "description": "Transaksi penjualan (POS)",
+      "columns": [
+        "Sale ID",
+        "Sale Date",
+        "Invoice No",
+        "Customer ID",
+        "Product ID",
+        "Quantity",
+        "Unit Price",
+        "Discount",
+        "Tax",
+        "Total",
+        "Payment Method",
+        "Created By",
+        "Created Date",
+        "Status"
+      ]
+    },
+    {
+      "name": "Purchases",
+      "description": "Transaksi pembelian",
+      "columns": [
+        "Purchase ID",
+        "Purchase Date",
+        "PO No",
+        "Supplier ID",
+        "Product ID",
+        "Quantity",
+        "Unit Price",
+        "Discount",
+        "Tax",
+        "Total",
+        "Payment Status",
+        "Created By",
+        "Created Date",
+        "Status"
+      ]
+    },
+    {
+      "name": "Receivables",
+      "description": "Piutang usaha",
+      "columns": [
+        "Receivable ID",
+        "Invoice No",
+        "Invoice Date",
+        "Due Date",
+        "Customer ID",
+        "Amount",
+        "Paid Amount",
+        "Balance",
+        "Status",
+        "Created By",
+        "Created Date"
+      ]
+    },
+    {
+      "name": "Payables",
+      "description": "Utang usaha",
+      "columns": [
+        "Payable ID",
+        "Invoice No",
+        "Invoice Date",
+        "Due Date",
+        "Supplier ID",
+        "Amount",
+        "Paid Amount",
+        "Balance",
+        "Status",
+        "Created By",
+        "Created Date"
+      ]
+    },
+    {
+      "name": "Inventory",
+      "description": "Pergerakan stok barang",
+      "columns": [
+        "Movement ID",
+        "Date",
+        "Product ID",
+        "Transaction Type",
+        "Reference No",
+        "Quantity In",
+        "Quantity Out",
+        "Balance",
+        "Notes",
+        "Created By",
+        "Created Date"
+      ]
+    },
+    {
+      "name": "Settings",
+      "description": "Pengaturan sistem",
+      "columns": [
+        "Setting Key",
+        "Setting Value",
+        "Description",
+        "Updated Date"
+      ]
+    }
+  ],
+  "default_accounts": [
+    {"code": "1-1001", "name": "Kas", "type": "Aset", "category": "Aset Lancar"},
+    {"code": "1-1002", "name": "Bank", "type": "Aset", "category": "Aset Lancar"},
+    {"code": "1-1003", "name": "Piutang Usaha", "type": "Aset", "category": "Aset Lancar"},
+    {"code": "1-1004", "name": "Persediaan Barang", "type": "Aset", "category": "Aset Lancar"},
+    {"code": "1-1005", "name": "Uang Muka", "type": "Aset", "category": "Aset Lancar"},
+    {"code": "1-2001", "name": "Peralatan", "type": "Aset", "category": "Aset Tetap"},
+    {"code": "1-2002", "name": "Kendaraan", "type": "Aset", "category": "Aset Tetap"},
+    {"code": "1-2003", "name": "Gedung", "type": "Aset", "category": "Aset Tetap"},
+    {"code": "1-2004", "name": "Akumulasi Penyusutan", "type": "Aset", "category": "Aset Tetap"},
+    {"code": "2-1001", "name": "Utang Usaha", "type": "Liabilitas", "category": "Liabilitas Jangka Pendek"},
+    {"code": "2-1002", "name": "Utang Gaji", "type": "Liabilitas", "category": "Liabilitas Jangka Pendek"},
+    {"code": "2-1003", "name": "Utang Pajak", "type": "Liabilitas", "category": "Liabilitas Jangka Pendek"},
+    {"code": "2-2001", "name": "Utang Bank", "type": "Liabilitas", "category": "Liabilitas Jangka Panjang"},
+    {"code": "3-1001", "name": "Modal Pemilik", "type": "Ekuitas", "category": "Modal"},
+    {"code": "3-1002", "name": "Prive/Penarikan Modal", "type": "Ekuitas", "category": "Modal"},
+    {"code": "3-1003", "name": "Laba Ditahan", "type": "Ekuitas", "category": "Modal"},
+    {"code": "4-1001", "name": "Pendapatan Penjualan", "type": "Pendapatan", "category": "Pendapatan Operasional"},
+    {"code": "4-1002", "name": "Pendapatan Jasa", "type": "Pendapatan", "category": "Pendapatan Operasional"},
+    {"code": "4-2001", "name": "Pendapatan Lain-lain", "type": "Pendapatan", "category": "Pendapatan Non-Operasional"},
+    {"code": "5-1001", "name": "Harga Pokok Penjualan", "type": "Beban", "category": "Beban Pokok"},
+    {"code": "5-2001", "name": "Beban Gaji", "type": "Beban", "category": "Beban Operasional"},
+    {"code": "5-2002", "name": "Beban Sewa", "type": "Beban", "category": "Beban Operasional"},
+    {"code": "5-2003", "name": "Beban Listrik & Air", "type": "Beban", "category": "Beban Operasional"},
+    {"code": "5-2004", "name": "Beban Telepon & Internet", "type": "Beban", "category": "Beban Operasional"},
+    {"code": "5-2005", "name": "Beban Perlengkapan", "type": "Beban", "category": "Beban Operasional"},
+    {"code": "5-2006", "name": "Beban Transport", "type": "Beban", "category": "Beban Operasional"},
+    {"code": "5-2007", "name": "Beban Pemeliharaan", "type": "Beban", "category": "Beban Operasional"},
+    {"code": "5-2008", "name": "Beban Penyusutan", "type": "Beban", "category": "Beban Operasional"},
+    {"code": "5-3001", "name": "Beban Bunga", "type": "Beban", "category": "Beban Non-Operasional"},
+    {"code": "5-3002", "name": "Beban Lain-lain", "type": "Beban", "category": "Beban Non-Operasional"}
+  ],
+  "default_settings": [
+    {"key": "company_name", "value": "Nama UMKM Anda", "description": "Nama perusahaan"},
+    {"key": "company_address", "value": "", "description": "Alamat perusahaan"},
+    {"key": "company_phone", "value": "", "description": "Nomor telepon"},
+    {"key": "company_email", "value": "", "description": "Email perusahaan"},
+    {"key": "tax_rate", "value": "11", "description": "Tarif pajak (%)"},
+    {"key": "fiscal_year_start", "value": "01-01", "description": "Awal tahun fiskal (MM-DD)"},
+    {"key": "currency", "value": "IDR", "description": "Mata uang"},
+    {"key": "session_timeout", "value": "30", "description": "Timeout sesi (menit)"}
+  ]
+}

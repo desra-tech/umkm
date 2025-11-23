@@ -1,0 +1,125 @@
+<div class="dashboard">
+    <div id="dashboardAlert" class="alert"></div>
+
+    <!-- Summary Cards -->
+    <div class="card-grid">
+        <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <h3>Pendapatan Bulan Ini</h3>
+            <div class="stat-value" id="totalRevenue">Rp 0</div>
+            <div class="stat-label">Total pendapatan periode berjalan</div>
+        </div>
+
+        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <h3>Pengeluaran Bulan Ini</h3>
+            <div class="stat-value" id="totalExpenses">Rp 0</div>
+            <div class="stat-label">Total pengeluaran periode berjalan</div>
+        </div>
+
+        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <h3>Laba Bersih</h3>
+            <div class="stat-value" id="netProfit">Rp 0</div>
+            <div class="stat-label">Laba bersih periode berjalan</div>
+        </div>
+
+        <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <h3>Saldo Kas</h3>
+            <div class="stat-value" id="cashBalance">Rp 0</div>
+            <div class="stat-label">Saldo kas dan bank saat ini</div>
+        </div>
+    </div>
+
+    <!-- Financial Position -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Posisi Keuangan</h2>
+        </div>
+        <div class="card-grid">
+            <div>
+                <h3 style="color: #3498db; margin-bottom: 15px;">Total Aset</h3>
+                <p style="font-size: 24px; font-weight: 600;" id="totalAssets">Rp 0</p>
+            </div>
+            <div>
+                <h3 style="color: #e74c3c; margin-bottom: 15px;">Total Kewajiban</h3>
+                <p style="font-size: 24px; font-weight: 600;" id="totalLiabilities">Rp 0</p>
+            </div>
+            <div>
+                <h3 style="color: #2ecc71; margin-bottom: 15px;">Total Ekuitas</h3>
+                <p style="font-size: 24px; font-weight: 600;" id="totalEquity">Rp 0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts and Notifications -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Pemberitahuan</h2>
+        </div>
+        <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="notification-item">
+                <div style="font-size: 32px;">📦</div>
+                <h3>Stok Menipis</h3>
+                <p id="lowStockCount" style="font-size: 24px; font-weight: 600; color: #e74c3c;">0</p>
+                <p style="font-size: 12px; color: #666;">Produk dengan stok rendah</p>
+            </div>
+            <div class="notification-item">
+                <div style="font-size: 32px;">📝</div>
+                <h3>Piutang Tertunda</h3>
+                <p id="pendingReceivables" style="font-size: 24px; font-weight: 600; color: #f39c12;">Rp 0</p>
+                <p style="font-size: 12px; color: #666;">Total piutang belum dibayar</p>
+            </div>
+            <div class="notification-item">
+                <div style="font-size: 32px;">📄</div>
+                <h3>Utang Tertunda</h3>
+                <p id="pendingPayables" style="font-size: 24px; font-weight: 600; color: #3498db;">Rp 0</p>
+                <p style="font-size: 12px; color: #666;">Total utang belum dibayar</p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .notification-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .notification-item h3 {
+            font-size: 14px;
+            color: #666;
+            margin: 10px 0;
+        }
+    </style>
+
+    <script>
+        function updateDashboard(data) {
+            try {
+                // Update revenue and expenses
+                document.getElementById('totalRevenue').textContent = formatCurrency(data.currentMonth.revenue);
+                document.getElementById('totalExpenses').textContent = formatCurrency(data.currentMonth.expenses);
+                document.getElementById('netProfit').textContent = formatCurrency(data.currentMonth.netProfit);
+
+                // Update financial position
+                document.getElementById('totalAssets').textContent = formatCurrency(data.financial.totalAssets);
+                document.getElementById('totalLiabilities').textContent = formatCurrency(data.financial.totalLiabilities);
+                document.getElementById('totalEquity').textContent = formatCurrency(data.financial.totalEquity);
+                document.getElementById('cashBalance').textContent = formatCurrency(data.financial.cashBalance);
+
+                // Update notifications
+                document.getElementById('lowStockCount').textContent = data.operations.lowStockCount;
+                document.getElementById('pendingReceivables').textContent = formatCurrency(data.operations.pendingReceivables);
+                document.getElementById('pendingPayables').textContent = formatCurrency(data.operations.pendingPayables);
+
+                // Show alerts if needed
+                if (data.operations.lowStockCount > 0) {
+                    const alert = document.getElementById('dashboardAlert');
+                    alert.className = 'alert alert-warning';
+                    alert.textContent = `⚠️ Perhatian: ${data.operations.lowStockCount} produk memiliki stok yang menipis!`;
+                    alert.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error updating dashboard:', error);
+            }
+        }
+    </script>
+</div>
