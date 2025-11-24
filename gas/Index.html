@@ -705,8 +705,16 @@
     async function apiCall(action, params = {}) {
       return new Promise((resolve, reject) => {
         google.script.run
-          .withSuccessHandler(resolve)
-          .withFailureHandler(reject)
+          .withSuccessHandler(function(result) {
+            if (result === null || result === undefined) {
+              reject(new Error('Server returned null response. Please check if database is initialized.'));
+            } else {
+              resolve(result);
+            }
+          })
+          .withFailureHandler(function(error) {
+            reject(new Error(error.message || error.toString()));
+          })
           .handleRequest(action, params, sessionToken);
       });
     }
@@ -896,24 +904,40 @@
       try {
         const income = await apiCall('getIncomeStatement', { startDate, endDate });
 
-        if (income.success && income.data) {
+        if (income && income.success && income.data) {
           document.getElementById('dashTotalRevenue').textContent =
-            formatCurrency(income.data.totalRevenue);
+            formatCurrency(income.data.totalRevenue || 0);
           document.getElementById('dashTotalExpense').textContent =
-            formatCurrency(income.data.totalExpenses + income.data.totalCOGS);
+            formatCurrency((income.data.totalExpenses || 0) + (income.data.totalCOGS || 0));
           document.getElementById('dashNetIncome').textContent =
-            formatCurrency(income.data.netIncome);
+            formatCurrency(income.data.netIncome || 0);
+        } else {
+          console.error('Income statement failed:', income);
+          document.getElementById('dashTotalRevenue').textContent = 'Rp 0';
+          document.getElementById('dashTotalExpense').textContent = 'Rp 0';
+          document.getElementById('dashNetIncome').textContent = 'Rp 0';
         }
 
         const cashFlow = await apiCall('getCashFlow', { startDate, endDate });
-        if (cashFlow.success && cashFlow.data) {
+        if (cashFlow && cashFlow.success && cashFlow.data) {
           document.getElementById('dashCash').textContent =
-            formatCurrency(cashFlow.data.endingCash);
+            formatCurrency(cashFlow.data.endingCash || 0);
+        } else {
+          console.error('Cash flow failed:', cashFlow);
+          document.getElementById('dashCash').textContent = 'Rp 0';
         }
 
         document.querySelector('#pageDashboard .loading').style.display = 'none';
       } catch (error) {
-        showAlert('Error loading dashboard: ' + error.message, 'error');
+        console.error('Dashboard error:', error);
+        document.querySelector('#pageDashboard .loading').style.display = 'none';
+        showAlert('Error loading dashboard: ' + (error.message || 'Unknown error. Please check if database is initialized by running setupDatabase() function.'), 'error');
+
+        // Set default values
+        document.getElementById('dashTotalRevenue').textContent = 'Rp 0';
+        document.getElementById('dashTotalExpense').textContent = 'Rp 0';
+        document.getElementById('dashNetIncome').textContent = 'Rp 0';
+        document.getElementById('dashCash').textContent = 'Rp 0';
       }
     }
 
