@@ -1,0 +1,889 @@
+<script>
+// ==========================================
+// MASTER DATA - ACCOUNTS
+// ==========================================
+async function loadAccounts() {
+  const page = document.getElementById('pageAccounts');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>Daftar Akun</h2>
+      <button onclick="showAccountModal()" class="btn btn-sm">+ Tambah Akun</button>
+    </div>
+    <div class="table-responsive">
+      <table id="accountsTable">
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Nama</th>
+            <th>Tipe</th>
+            <th>Kategori</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  `;
+
+  try {
+    const result = await apiCall('getAccounts');
+    if (result.success) {
+      const tbody = page.querySelector('tbody');
+      tbody.innerHTML = result.data.map(acc => `
+        <tr>
+          <td>${acc.code}</td>
+          <td>${acc.name}</td>
+          <td>${acc.type}</td>
+          <td>${acc.category}</td>
+          <td>${acc.isActive ? '✅ Aktif' : '❌ Nonaktif'}</td>
+          <td class="action-buttons">
+            <button onclick='editAccount(${JSON.stringify(acc)})' class="btn btn-sm btn-secondary">Edit</button>
+            <button onclick="deleteAccount(${acc.id})" class="btn btn-sm btn-danger">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (error) {
+    showAlert('Error loading accounts: ' + error.message, 'error');
+  }
+}
+
+function showAccountModal(account = null) {
+  const modal = createModal('Account', `
+    <div class="form-group">
+      <label>Kode Akun *</label>
+      <input type="text" id="accountCode" value="${account?.code || ''}" required>
+    </div>
+    <div class="form-group">
+      <label>Nama Akun *</label>
+      <input type="text" id="accountName" value="${account?.name || ''}" required>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tipe *</label>
+        <select id="accountType" required>
+          <option value="Asset" ${account?.type === 'Asset' ? 'selected' : ''}>Asset</option>
+          <option value="Liability" ${account?.type === 'Liability' ? 'selected' : ''}>Liability</option>
+          <option value="Equity" ${account?.type === 'Equity' ? 'selected' : ''}>Equity</option>
+          <option value="Revenue" ${account?.type === 'Revenue' ? 'selected' : ''}>Revenue</option>
+          <option value="Expense" ${account?.type === 'Expense' ? 'selected' : ''}>Expense</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Kategori</label>
+        <input type="text" id="accountCategory" value="${account?.category || ''}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Parent Akun</label>
+      <input type="text" id="accountParent" value="${account?.parent || ''}">
+    </div>
+    <div class="form-group">
+      <label>Deskripsi</label>
+      <textarea id="accountDescription" rows="3">${account?.description || ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="accountActive" ${account?.isActive !== false ? 'checked' : ''}>
+        Aktif
+      </label>
+    </div>
+    <button onclick="saveAccount(${account?.id || 'null'})" class="btn">Simpan</button>
+  `);
+  showModal(modal);
+}
+
+function editAccount(account) {
+  showAccountModal(account);
+}
+
+async function saveAccount(id) {
+  const params = {
+    id: id,
+    code: document.getElementById('accountCode').value,
+    name: document.getElementById('accountName').value,
+    type: document.getElementById('accountType').value,
+    category: document.getElementById('accountCategory').value,
+    parent: document.getElementById('accountParent').value,
+    description: document.getElementById('accountDescription').value,
+    isActive: document.getElementById('accountActive').checked
+  };
+
+  try {
+    const result = await apiCall('saveAccount', params);
+    if (result.success) {
+      showAlert(result.message, 'success');
+      closeModal();
+      loadAccounts();
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+async function deleteAccount(id) {
+  if (!confirm('Yakin ingin menghapus akun ini?')) return;
+
+  try {
+    const result = await apiCall('deleteAccount', { id });
+    if (result.success) {
+      showAlert(result.message, 'success');
+      loadAccounts();
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+// ==========================================
+// MASTER DATA - CUSTOMERS
+// ==========================================
+async function loadCustomers() {
+  const page = document.getElementById('pageCustomers');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>Daftar Pelanggan</h2>
+      <button onclick="showCustomerModal()" class="btn btn-sm">+ Tambah Pelanggan</button>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Nama</th>
+            <th>Kontak</th>
+            <th>Telepon</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  `;
+
+  try {
+    const result = await apiCall('getCustomers');
+    if (result.success) {
+      const tbody = page.querySelector('tbody');
+      tbody.innerHTML = result.data.map(cust => `
+        <tr>
+          <td>${cust.code}</td>
+          <td>${cust.name}</td>
+          <td>${cust.contact || '-'}</td>
+          <td>${cust.phone || '-'}</td>
+          <td>${cust.email || '-'}</td>
+          <td>${cust.isActive ? '✅' : '❌'}</td>
+          <td class="action-buttons">
+            <button onclick='editCustomer(${JSON.stringify(cust).replace(/'/g, "&#39;")})' class="btn btn-sm btn-secondary">Edit</button>
+            <button onclick="deleteCustomer(${cust.id})" class="btn btn-sm btn-danger">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+function showCustomerModal(customer = null) {
+  const modal = createModal('Pelanggan', `
+    <div class="form-row">
+      <div class="form-group">
+        <label>Kode *</label>
+        <input type="text" id="custCode" value="${customer?.code || ''}" required>
+      </div>
+      <div class="form-group">
+        <label>Nama *</label>
+        <input type="text" id="custName" value="${customer?.name || ''}" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nama Kontak</label>
+        <input type="text" id="custContact" value="${customer?.contact || ''}">
+      </div>
+      <div class="form-group">
+        <label>Telepon</label>
+        <input type="tel" id="custPhone" value="${customer?.phone || ''}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="custEmail" value="${customer?.email || ''}">
+    </div>
+    <div class="form-group">
+      <label>Alamat</label>
+      <textarea id="custAddress" rows="3">${customer?.address || ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Limit Kredit</label>
+      <input type="number" id="custCredit" value="${customer?.creditLimit || 0}">
+    </div>
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="custActive" ${customer?.isActive !== false ? 'checked' : ''}>
+        Aktif
+      </label>
+    </div>
+    <button onclick="saveCustomer(${customer?.id || 'null'})" class="btn">Simpan</button>
+  `);
+  showModal(modal);
+}
+
+function editCustomer(customer) {
+  showCustomerModal(customer);
+}
+
+async function saveCustomer(id) {
+  const params = {
+    id: id,
+    code: document.getElementById('custCode').value,
+    name: document.getElementById('custName').value,
+    contact: document.getElementById('custContact').value,
+    phone: document.getElementById('custPhone').value,
+    email: document.getElementById('custEmail').value,
+    address: document.getElementById('custAddress').value,
+    creditLimit: document.getElementById('custCredit').value,
+    isActive: document.getElementById('custActive').checked
+  };
+
+  try {
+    const result = await apiCall('saveCustomer', params);
+    if (result.success) {
+      showAlert(result.message, 'success');
+      closeModal();
+      loadCustomers();
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+async function deleteCustomer(id) {
+  if (!confirm('Yakin ingin menghapus pelanggan ini?')) return;
+
+  try {
+    const result = await apiCall('deleteCustomer', { id });
+    if (result.success) {
+      showAlert(result.message, 'success');
+      loadCustomers();
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+// ==========================================
+// MASTER DATA - SUPPLIERS
+// ==========================================
+async function loadSuppliers() {
+  const page = document.getElementById('pageSuppliers');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>Daftar Pemasok</h2>
+      <button onclick="showSupplierModal()" class="btn btn-sm">+ Tambah Pemasok</button>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Nama</th>
+            <th>Kontak</th>
+            <th>Telepon</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  `;
+
+  try {
+    const result = await apiCall('getSuppliers');
+    if (result.success) {
+      const tbody = page.querySelector('tbody');
+      tbody.innerHTML = result.data.map(supp => `
+        <tr>
+          <td>${supp.code}</td>
+          <td>${supp.name}</td>
+          <td>${supp.contact || '-'}</td>
+          <td>${supp.phone || '-'}</td>
+          <td>${supp.email || '-'}</td>
+          <td>${supp.isActive ? '✅' : '❌'}</td>
+          <td class="action-buttons">
+            <button onclick='editSupplier(${JSON.stringify(supp).replace(/'/g, "&#39;")})' class="btn btn-sm btn-secondary">Edit</button>
+            <button onclick="deleteSupplier(${supp.id})" class="btn btn-sm btn-danger">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+function showSupplierModal(supplier = null) {
+  const modal = createModal('Pemasok', `
+    <div class="form-row">
+      <div class="form-group">
+        <label>Kode *</label>
+        <input type="text" id="suppCode" value="${supplier?.code || ''}" required>
+      </div>
+      <div class="form-group">
+        <label>Nama *</label>
+        <input type="text" id="suppName" value="${supplier?.name || ''}" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nama Kontak</label>
+        <input type="text" id="suppContact" value="${supplier?.contact || ''}">
+      </div>
+      <div class="form-group">
+        <label>Telepon</label>
+        <input type="tel" id="suppPhone" value="${supplier?.phone || ''}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="suppEmail" value="${supplier?.email || ''}">
+    </div>
+    <div class="form-group">
+      <label>Alamat</label>
+      <textarea id="suppAddress" rows="3">${supplier?.address || ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Terms Pembayaran</label>
+      <input type="text" id="suppTerms" value="${supplier?.paymentTerms || ''}">
+    </div>
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="suppActive" ${supplier?.isActive !== false ? 'checked' : ''}>
+        Aktif
+      </label>
+    </div>
+    <button onclick="saveSupplier(${supplier?.id || 'null'})" class="btn">Simpan</button>
+  `);
+  showModal(modal);
+}
+
+function editSupplier(supplier) {
+  showSupplierModal(supplier);
+}
+
+async function saveSupplier(id) {
+  const params = {
+    id: id,
+    code: document.getElementById('suppCode').value,
+    name: document.getElementById('suppName').value,
+    contact: document.getElementById('suppContact').value,
+    phone: document.getElementById('suppPhone').value,
+    email: document.getElementById('suppEmail').value,
+    address: document.getElementById('suppAddress').value,
+    paymentTerms: document.getElementById('suppTerms').value,
+    isActive: document.getElementById('suppActive').checked
+  };
+
+  try {
+    const result = await apiCall('saveSupplier', params);
+    if (result.success) {
+      showAlert(result.message, 'success');
+      closeModal();
+      loadSuppliers();
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+async function deleteSupplier(id) {
+  if (!confirm('Yakin ingin menghapus pemasok ini?')) return;
+
+  try {
+    const result = await apiCall('deleteSupplier', { id });
+    if (result.success) {
+      showAlert(result.message, 'success');
+      loadSuppliers();
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+// ==========================================
+// MASTER DATA - PRODUCTS
+// ==========================================
+async function loadProducts() {
+  const page = document.getElementById('pageProducts');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>Daftar Produk</h2>
+      <button onclick="showProductModal()" class="btn btn-sm">+ Tambah Produk</button>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Nama</th>
+            <th>Kategori</th>
+            <th>Unit</th>
+            <th>Harga Beli</th>
+            <th>Harga Jual</th>
+            <th>Stok</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  `;
+
+  try {
+    const result = await apiCall('getProducts');
+    if (result.success) {
+      window.productsData = result.data; // Store for POS
+      const tbody = page.querySelector('tbody');
+      tbody.innerHTML = result.data.map(prod => `
+        <tr>
+          <td>${prod.code}</td>
+          <td>${prod.name}</td>
+          <td>${prod.category || '-'}</td>
+          <td>${prod.unit || '-'}</td>
+          <td>${formatCurrency(prod.purchasePrice)}</td>
+          <td>${formatCurrency(prod.sellingPrice)}</td>
+          <td>${prod.currentStock}</td>
+          <td>${prod.isActive ? '✅' : '❌'}</td>
+          <td class="action-buttons">
+            <button onclick='editProduct(${JSON.stringify(prod).replace(/'/g, "&#39;")})' class="btn btn-sm btn-secondary">Edit</button>
+            <button onclick="deleteProduct(${prod.id})" class="btn btn-sm btn-danger">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+function showProductModal(product = null) {
+  const modal = createModal('Produk', `
+    <div class="form-row">
+      <div class="form-group">
+        <label>Kode *</label>
+        <input type="text" id="prodCode" value="${product?.code || ''}" required>
+      </div>
+      <div class="form-group">
+        <label>Nama *</label>
+        <input type="text" id="prodName" value="${product?.name || ''}" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Kategori</label>
+        <input type="text" id="prodCategory" value="${product?.category || ''}">
+      </div>
+      <div class="form-group">
+        <label>Unit</label>
+        <input type="text" id="prodUnit" value="${product?.unit || ''}">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Harga Beli</label>
+        <input type="number" id="prodPurchasePrice" value="${product?.purchasePrice || 0}">
+      </div>
+      <div class="form-group">
+        <label>Harga Jual *</label>
+        <input type="number" id="prodSellingPrice" value="${product?.sellingPrice || 0}" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Stok Minimum</label>
+        <input type="number" id="prodMinStock" value="${product?.minStock || 0}">
+      </div>
+      <div class="form-group">
+        <label>Stok Saat Ini</label>
+        <input type="number" id="prodCurrentStock" value="${product?.currentStock || 0}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="prodActive" ${product?.isActive !== false ? 'checked' : ''}>
+        Aktif
+      </label>
+    </div>
+    <button onclick="saveProduct(${product?.id || 'null'})" class="btn">Simpan</button>
+  `);
+  showModal(modal);
+}
+
+function editProduct(product) {
+  showProductModal(product);
+}
+
+async function saveProduct(id) {
+  const params = {
+    id: id,
+    code: document.getElementById('prodCode').value,
+    name: document.getElementById('prodName').value,
+    category: document.getElementById('prodCategory').value,
+    unit: document.getElementById('prodUnit').value,
+    purchasePrice: document.getElementById('prodPurchasePrice').value,
+    sellingPrice: document.getElementById('prodSellingPrice').value,
+    minStock: document.getElementById('prodMinStock').value,
+    currentStock: document.getElementById('prodCurrentStock').value,
+    isActive: document.getElementById('prodActive').checked
+  };
+
+  try {
+    const result = await apiCall('saveProduct', params);
+    if (result.success) {
+      showAlert(result.message, 'success');
+      closeModal();
+      loadProducts();
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+async function deleteProduct(id) {
+  if (!confirm('Yakin ingin menghapus produk ini?')) return;
+
+  try {
+    const result = await apiCall('deleteProduct', { id });
+    if (result.success) {
+      showAlert(result.message, 'success');
+      loadProducts();
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+// ==========================================
+// TRANSACTIONS
+// ==========================================
+async function loadTransactions() {
+  const page = document.getElementById('pageTransactions');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>Transaksi</h2>
+      <button onclick="showTransactionModal()" class="btn btn-sm">+ Tambah Transaksi</button>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Dari Tanggal</label>
+          <input type="date" id="txStartDate">
+        </div>
+        <div class="form-group">
+          <label>Sampai Tanggal</label>
+          <input type="date" id="txEndDate">
+        </div>
+        <div class="form-group">
+          <label>Tipe</label>
+          <select id="txTypeFilter">
+            <option value="">Semua</option>
+            <option value="receipt">Penerimaan</option>
+            <option value="payment">Pengeluaran</option>
+            <option value="sale">Penjualan</option>
+            <option value="purchase">Pembelian</option>
+            <option value="capital">Modal</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <button onclick="filterTransactions()" class="btn btn-sm" style="margin-top: 25px;">Filter</button>
+        </div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table id="transactionsTable">
+        <thead>
+          <tr>
+            <th>No. Transaksi</th>
+            <th>Tanggal</th>
+            <th>Tipe</th>
+            <th>Deskripsi</th>
+            <th>Jumlah</th>
+            <th>Metode</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  `;
+
+  filterTransactions();
+}
+
+async function filterTransactions() {
+  const params = {
+    startDate: document.getElementById('txStartDate')?.value,
+    endDate: document.getElementById('txEndDate')?.value,
+    type: document.getElementById('txTypeFilter')?.value
+  };
+
+  try {
+    const result = await apiCall('getTransactions', params);
+    if (result.success) {
+      const tbody = document.querySelector('#transactionsTable tbody');
+      tbody.innerHTML = result.data.map(tx => `
+        <tr>
+          <td>${tx.transactionNumber}</td>
+          <td>${formatDate(tx.date)}</td>
+          <td>${tx.type}</td>
+          <td>${tx.description}</td>
+          <td>${formatCurrency(tx.amount)}</td>
+          <td>${tx.paymentMethod}</td>
+          <td>${tx.status}</td>
+          <td class="action-buttons">
+            <button onclick="deleteTransaction(${tx.id})" class="btn btn-sm btn-danger">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+function showTransactionModal() {
+  const modal = createModal('Transaksi Baru', `
+    <div class="form-group">
+      <label>Tipe Transaksi *</label>
+      <select id="txType" required>
+        <option value="receipt">Penerimaan</option>
+        <option value="payment">Pengeluaran</option>
+        <option value="capital">Modal</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tanggal *</label>
+        <input type="date" id="txDate" value="${new Date().toISOString().split('T')[0]}" required>
+      </div>
+      <div class="form-group">
+        <label>Jumlah *</label>
+        <input type="number" id="txAmount" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Akun (ID)</label>
+      <input type="text" id="txAccount" placeholder="ID Akun">
+    </div>
+    <div class="form-group">
+      <label>Deskripsi</label>
+      <textarea id="txDescription" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Metode Pembayaran</label>
+      <select id="txPayment">
+        <option value="Cash">Tunai</option>
+        <option value="Bank">Transfer Bank</option>
+        <option value="Credit">Kredit</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Referensi</label>
+      <input type="text" id="txReference">
+    </div>
+    <button onclick="saveTransaction()" class="btn">Simpan</button>
+  `);
+  showModal(modal);
+}
+
+async function saveTransaction() {
+  const params = {
+    type: document.getElementById('txType').value,
+    date: document.getElementById('txDate').value,
+    amount: document.getElementById('txAmount').value,
+    accountId: document.getElementById('txAccount').value,
+    description: document.getElementById('txDescription').value,
+    paymentMethod: document.getElementById('txPayment').value,
+    reference: document.getElementById('txReference').value
+  };
+
+  try {
+    const result = await apiCall('saveTransaction', params);
+    if (result.success) {
+      showAlert(result.message, 'success');
+      closeModal();
+      loadTransactions();
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+async function deleteTransaction(id) {
+  if (!confirm('Yakin ingin menghapus transaksi ini?')) return;
+
+  try {
+    const result = await apiCall('deleteTransaction', { id });
+    if (result.success) {
+      showAlert(result.message, 'success');
+      loadTransactions();
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+// ==========================================
+// REPORTS - INCOME STATEMENT
+// ==========================================
+async function loadIncomeStatement() {
+  const page = document.getElementById('pageIncomeStatement');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>Laporan Laba Rugi</h2>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Dari Tanggal</label>
+          <input type="date" id="isStartDate" value="${new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0]}">
+        </div>
+        <div class="form-group">
+          <label>Sampai Tanggal</label>
+          <input type="date" id="isEndDate" value="${new Date().toISOString().split('T')[0]}">
+        </div>
+        <div class="form-group">
+          <button onclick="generateIncomeStatement()" class="btn btn-sm" style="margin-top: 25px;">Generate</button>
+        </div>
+      </div>
+    </div>
+    <div id="reportContent"></div>
+  `;
+
+  generateIncomeStatement();
+}
+
+async function generateIncomeStatement() {
+  const startDate = document.getElementById('isStartDate').value;
+  const endDate = document.getElementById('isEndDate').value;
+
+  try {
+    const result = await apiCall('getIncomeStatement', { startDate, endDate });
+    if (result.success) {
+      const data = result.data;
+      const reportContent = document.getElementById('reportContent');
+
+      reportContent.innerHTML = `
+        <div class="report-section">
+          <h3>PENDAPATAN</h3>
+          ${data.revenues.map(r => `
+            <div class="report-row">
+              <span>${r.account.name}</span>
+              <span>${formatCurrency(r.amount)}</span>
+            </div>
+          `).join('')}
+          <div class="report-row subtotal">
+            <span>Total Pendapatan</span>
+            <span>${formatCurrency(data.totalRevenue)}</span>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <h3>HARGA POKOK PENJUALAN</h3>
+          ${data.cogs.map(c => `
+            <div class="report-row">
+              <span>${c.account.name}</span>
+              <span>${formatCurrency(c.amount)}</span>
+            </div>
+          `).join('')}
+          <div class="report-row subtotal">
+            <span>Total HPP</span>
+            <span>${formatCurrency(data.totalCOGS)}</span>
+          </div>
+        </div>
+
+        <div class="report-row subtotal">
+          <span>LABA KOTOR</span>
+          <span>${formatCurrency(data.grossProfit)}</span>
+        </div>
+
+        <div class="report-section">
+          <h3>BEBAN OPERASIONAL</h3>
+          ${data.expenses.map(e => `
+            <div class="report-row">
+              <span>${e.account.name}</span>
+              <span>${formatCurrency(e.amount)}</span>
+            </div>
+          `).join('')}
+          <div class="report-row subtotal">
+            <span>Total Beban</span>
+            <span>${formatCurrency(data.totalExpenses)}</span>
+          </div>
+        </div>
+
+        <div class="report-row total">
+          <span>LABA BERSIH</span>
+          <span>${formatCurrency(data.netIncome)}</span>
+        </div>
+      `;
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+// Continue with more functions...
+// (Due to length, I'll create additional files)
+
+// ==========================================
+// MODAL UTILITIES
+// ==========================================
+function createModal(title, content) {
+  return `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>${title}</h3>
+        <button class="close-modal" onclick="closeModal()">&times;</button>
+      </div>
+      ${content}
+    </div>
+  `;
+}
+
+function showModal(html) {
+  const container = document.getElementById('modalContainer');
+  container.innerHTML = `<div class="modal active">${html}</div>`;
+}
+
+function closeModal() {
+  document.getElementById('modalContainer').innerHTML = '';
+}
+</script>

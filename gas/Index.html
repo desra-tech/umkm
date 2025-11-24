@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UMKM Accounting System</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Login Page */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .login-box {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-box h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #667eea;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: #5568d3;
+    }
+
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .btn-success {
+      background: #28a745;
+    }
+
+    .btn-success:hover {
+      background: #218838;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 14px;
+      width: auto;
+    }
+
+    .alert {
+      padding: 12px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    /* Main App */
+    .app-container {
+      display: none;
+    }
+
+    .app-header {
+      background: white;
+      padding: 15px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .app-header .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .app-header h1 {
+      color: #667eea;
+      font-size: 24px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-info span {
+      color: #666;
+    }
+
+    .nav-menu {
+      background: white;
+      padding: 0;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .nav-menu ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .nav-menu li {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .nav-menu a {
+      display: block;
+      padding: 15px 20px;
+      color: #555;
+      text-decoration: none;
+      text-align: center;
+      border-right: 1px solid #eee;
+      transition: all 0.3s;
+    }
+
+    .nav-menu a:hover {
+      background: #f8f9fa;
+      color: #667eea;
+    }
+
+    .nav-menu a.active {
+      background: #667eea;
+      color: white;
+    }
+
+    .content-box {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .page-header h2 {
+      color: #333;
+      font-size: 24px;
+    }
+
+    /* Table */
+    .table-responsive {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    table th,
+    table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    table th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #555;
+    }
+
+    table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .modal-header h3 {
+      color: #333;
+      font-size: 20px;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #999;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      line-height: 1;
+    }
+
+    .close-modal:hover {
+      color: #333;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card h3 {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .card .amount {
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .card.success {
+      border-left-color: #28a745;
+    }
+
+    .card.danger {
+      border-left-color: #dc3545;
+    }
+
+    .card.info {
+      border-left-color: #17a2b8;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Filters */
+    .filter-bar {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 15px;
+      align-items: flex-end;
+    }
+
+    .filter-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    /* Report Sections */
+    .report-section {
+      margin-bottom: 30px;
+    }
+
+    .report-section h3 {
+      color: #555;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .report-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .report-row.total {
+      font-weight: bold;
+      border-top: 2px solid #333;
+      border-bottom: 2px solid #333;
+      margin-top: 10px;
+    }
+
+    .report-row.subtotal {
+      font-weight: 600;
+      background: #f8f9fa;
+      padding: 10px;
+      margin-top: 5px;
+    }
+
+    /* POS specific */
+    .pos-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .product-card {
+      background: white;
+      border: 2px solid #eee;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .product-card:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .product-card h4 {
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .product-card .price {
+      color: #667eea;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .cart-total {
+      font-size: 24px;
+      font-weight: bold;
+      color: #28a745;
+      text-align: right;
+      padding: 15px 0;
+      border-top: 2px solid #333;
+      margin-top: 10px;
+    }
+
+    /* Utility classes */
+    .text-right {
+      text-align: right;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .mt-20 {
+      margin-top: 20px;
+    }
+
+    .mb-20 {
+      margin-bottom: 20px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-menu ul {
+        flex-direction: column;
+      }
+
+      .nav-menu li {
+        width: 100%;
+      }
+
+      .nav-menu a {
+        border-right: none;
+        border-bottom: 1px solid #eee;
+      }
+
+      .pos-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .filter-row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Page -->
+  <div id="loginPage" class="login-container">
+    <div class="login-box">
+      <h2>🏪 UMKM Accounting</h2>
+      <div id="loginError"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="username" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" required>
+        </div>
+        <button type="submit" class="btn">Login</button>
+      </form>
+      <div style="margin-top: 20px; text-align: center; color: #666; font-size: 12px;">
+        <p>Default Admin: admin / Admin123!</p>
+        <p>Default User: user / User123!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="appContainer" class="app-container">
+    <!-- Header -->
+    <div class="app-header">
+      <div class="header-content">
+        <h1>🏪 UMKM Accounting System</h1>
+        <div class="user-info">
+          <span>Welcome, <strong id="currentUser"></strong> (<span id="currentRole"></span>)</span>
+          <button onclick="logout()" class="btn btn-secondary btn-sm">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Navigation -->
+      <nav class="nav-menu">
+        <ul id="navMenu"></ul>
+      </nav>
+
+      <!-- Content -->
+      <div class="content-box">
+        <div id="alertContainer"></div>
+
+        <!-- Dashboard Page -->
+        <div id="pageDashboard" class="page active">
+          <div class="page-header">
+            <h2>Dashboard</h2>
+          </div>
+          <div class="card-grid">
+            <div class="card success">
+              <h3>Total Pendapatan</h3>
+              <div class="amount" id="dashTotalRevenue">Rp 0</div>
+            </div>
+            <div class="card danger">
+              <h3>Total Pengeluaran</h3>
+              <div class="amount" id="dashTotalExpense">Rp 0</div>
+            </div>
+            <div class="card info">
+              <h3>Laba Bersih</h3>
+              <div class="amount" id="dashNetIncome">Rp 0</div>
+            </div>
+            <div class="card">
+              <h3>Kas & Bank</h3>
+              <div class="amount" id="dashCash">Rp 0</div>
+            </div>
+          </div>
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading dashboard data...</p>
+          </div>
+        </div>
+
+        <!-- Master Data Pages will be loaded here -->
+        <div id="pageAccounts" class="page"></div>
+        <div id="pageCustomers" class="page"></div>
+        <div id="pageSuppliers" class="page"></div>
+        <div id="pageProducts" class="page"></div>
+
+        <!-- Transaction Pages -->
+        <div id="pageTransactions" class="page"></div>
+
+        <!-- Report Pages -->
+        <div id="pageIncomeStatement" class="page"></div>
+        <div id="pageBalanceSheet" class="page"></div>
+        <div id="pageCashFlow" class="page"></div>
+
+        <!-- Business Management Pages -->
+        <div id="pagePOS" class="page"></div>
+        <div id="pageInventory" class="page"></div>
+        <div id="pageReceivables" class="page"></div>
+        <div id="pagePayables" class="page"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals will be inserted here dynamically -->
+  <div id="modalContainer"></div>
+
+  <script>
+    // ==========================================
+    // GLOBAL STATE
+    // ==========================================
+    let currentUser = null;
+    let currentRole = null;
+    let sessionToken = null;
+    let currentPage = 'Dashboard';
+
+    // ==========================================
+    // API FUNCTIONS
+    // ==========================================
+    async function apiCall(action, params = {}) {
+      return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)
+          .handleRequest(action, params, sessionToken);
+      });
+    }
+
+    function showAlert(message, type = 'info') {
+      const alertContainer = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      alertContainer.appendChild(alert);
+
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+
+    function formatCurrency(amount) {
+      return 'Rp ' + parseFloat(amount).toLocaleString('id-ID');
+    }
+
+    function formatDate(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      return d.toLocaleDateString('id-ID');
+    }
+
+    // ==========================================
+    // AUTHENTICATION
+    // ==========================================
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const loginError = document.getElementById('loginError');
+
+      loginError.innerHTML = '';
+
+      try {
+        const result = await apiCall('login', { username, password });
+
+        if (result.success) {
+          sessionToken = result.token;
+          currentUser = result.username;
+          currentRole = result.role;
+
+          document.getElementById('currentUser').textContent = currentUser;
+          document.getElementById('currentRole').textContent = currentRole;
+
+          document.getElementById('loginPage').style.display = 'none';
+          document.getElementById('appContainer').style.display = 'block';
+
+          initializeApp();
+        } else {
+          loginError.innerHTML = `<div class="alert alert-error">${result.error}</div>`;
+        }
+      } catch (error) {
+        loginError.innerHTML = `<div class="alert alert-error">Login failed: ${error.message}</div>`;
+      }
+    });
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        apiCall('logout').then(() => {
+          sessionToken = null;
+          currentUser = null;
+          currentRole = null;
+          document.getElementById('loginPage').style.display = 'flex';
+          document.getElementById('appContainer').style.display = 'none';
+        });
+      }
+    }
+
+    // ==========================================
+    // APP INITIALIZATION
+    // ==========================================
+    function initializeApp() {
+      buildNavigation();
+      loadDashboard();
+    }
+
+    function buildNavigation() {
+      const navMenu = document.getElementById('navMenu');
+      const menus = [];
+
+      menus.push({ name: 'Dashboard', icon: '📊', page: 'Dashboard' });
+
+      if (currentRole === 'admin') {
+        menus.push({ name: 'Akun', icon: '📋', page: 'Accounts' });
+        menus.push({ name: 'Pelanggan', icon: '👥', page: 'Customers' });
+        menus.push({ name: 'Pemasok', icon: '🏭', page: 'Suppliers' });
+        menus.push({ name: 'Produk', icon: '📦', page: 'Products' });
+      }
+
+      menus.push({ name: 'Transaksi', icon: '💰', page: 'Transactions' });
+      menus.push({ name: 'Laba Rugi', icon: '📈', page: 'IncomeStatement' });
+      menus.push({ name: 'Neraca', icon: '📊', page: 'BalanceSheet' });
+      menus.push({ name: 'Arus Kas', icon: '💵', page: 'CashFlow' });
+      menus.push({ name: 'Kasir', icon: '🛒', page: 'POS' });
+      menus.push({ name: 'Persediaan', icon: '📦', page: 'Inventory' });
+      menus.push({ name: 'Piutang', icon: '📝', page: 'Receivables' });
+      menus.push({ name: 'Utang', icon: '📋', page: 'Payables' });
+
+      navMenu.innerHTML = menus.map(menu => `
+        <li><a href="#" onclick="navigateTo('${menu.page}'); return false;" data-page="${menu.page}">
+          ${menu.icon} ${menu.name}
+        </a></li>
+      `).join('');
+    }
+
+    function navigateTo(pageName) {
+      currentPage = pageName;
+
+      // Update active nav
+      document.querySelectorAll('.nav-menu a').forEach(a => {
+        a.classList.remove('active');
+        if (a.getAttribute('data-page') === pageName) {
+          a.classList.add('active');
+        }
+      });
+
+      // Hide all pages
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+
+      // Show selected page
+      const pageElement = document.getElementById('page' + pageName);
+      if (pageElement) {
+        pageElement.classList.add('active');
+      }
+
+      // Load page data
+      loadPage(pageName);
+    }
+
+    function loadPage(pageName) {
+      switch(pageName) {
+        case 'Dashboard':
+          loadDashboard();
+          break;
+        case 'Accounts':
+          loadAccounts();
+          break;
+        case 'Customers':
+          loadCustomers();
+          break;
+        case 'Suppliers':
+          loadSuppliers();
+          break;
+        case 'Products':
+          loadProducts();
+          break;
+        case 'Transactions':
+          loadTransactions();
+          break;
+        case 'IncomeStatement':
+          loadIncomeStatement();
+          break;
+        case 'BalanceSheet':
+          loadBalanceSheet();
+          break;
+        case 'CashFlow':
+          loadCashFlow();
+          break;
+        case 'POS':
+          loadPOS();
+          break;
+        case 'Inventory':
+          loadInventory();
+          break;
+        case 'Receivables':
+          loadReceivables();
+          break;
+        case 'Payables':
+          loadPayables();
+          break;
+      }
+    }
+
+    // ==========================================
+    // DASHBOARD
+    // ==========================================
+    async function loadDashboard() {
+      const startDate = new Date(new Date().getFullYear(), 0, 1).toISOString();
+      const endDate = new Date().toISOString();
+
+      try {
+        const income = await apiCall('getIncomeStatement', { startDate, endDate });
+
+        if (income.success && income.data) {
+          document.getElementById('dashTotalRevenue').textContent =
+            formatCurrency(income.data.totalRevenue);
+          document.getElementById('dashTotalExpense').textContent =
+            formatCurrency(income.data.totalExpenses + income.data.totalCOGS);
+          document.getElementById('dashNetIncome').textContent =
+            formatCurrency(income.data.netIncome);
+        }
+
+        const cashFlow = await apiCall('getCashFlow', { startDate, endDate });
+        if (cashFlow.success && cashFlow.data) {
+          document.getElementById('dashCash').textContent =
+            formatCurrency(cashFlow.data.endingCash);
+        }
+
+        document.querySelector('#pageDashboard .loading').style.display = 'none';
+      } catch (error) {
+        showAlert('Error loading dashboard: ' + error.message, 'error');
+      }
+    }
+
+    // Page loaders will be continued in next part...
+    // Due to file size limits, I'll provide the continuation
+  </script>
+
+  <?!= include('AppScript'); ?>
+  <?!= include('AppScript2'); ?>
+</body>
+</html>
