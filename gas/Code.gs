@@ -168,6 +168,8 @@ function include(filename) {
  */
 function handleRequest(action, params, token) {
   try {
+    Logger.log('handleRequest called with action: ' + action);
+
     // Public actions (no authentication required)
     var publicActions = ['login', 'testConnection'];
 
@@ -175,6 +177,7 @@ function handleRequest(action, params, token) {
       // Validate session
       var session = validateSession(token);
       if (!session) {
+        Logger.log('Session validation failed for action: ' + action);
         return {
           success: false,
           error: 'Session expired or invalid. Please login again.'
@@ -184,6 +187,7 @@ function handleRequest(action, params, token) {
       // Check permissions
       var requiredPermission = getRequiredPermission(action);
       if (requiredPermission && !hasPermission(session.role, requiredPermission)) {
+        Logger.log('Permission denied for action: ' + action + ', role: ' + session.role);
         return {
           success: false,
           error: 'Access denied. Insufficient permissions.'
