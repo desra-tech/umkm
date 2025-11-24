@@ -152,7 +152,7 @@ function doGet(e) {
   var template = HtmlService.createTemplateFromFile('Index');
   return template.evaluate()
     .setTitle('UMKM Accounting System')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DENY)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
