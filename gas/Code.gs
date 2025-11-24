@@ -152,7 +152,7 @@ function doGet(e) {
   var template = HtmlService.createTemplateFromFile('Index');
   return template.evaluate()
     .setTitle('UMKM Accounting System')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DENY)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
@@ -586,9 +586,9 @@ function createSheet(ss, name, headers) {
   sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
   sheet.setFrozenRows(1);
 
-  // Auto-resize columns
+  // Set default column width (faster than auto-resize)
   for (var i = 1; i <= headers.length; i++) {
-    sheet.autoResizeColumn(i);
+    sheet.setColumnWidth(i, 120);
   }
 
   return sheet;
@@ -604,37 +604,16 @@ function createDefaultAdmin() {
   var adminPassword = 'Admin123!';
   var hashed = hashPassword(adminPassword);
 
-  userSheet.appendRow([
-    1,
-    'admin',
-    hashed.hash,
-    hashed.salt,
-    'admin',
-    'System Administrator',
-    'active',
-    0,
-    '',
-    new Date(),
-    new Date()
-  ]);
-
-  // Create default user
   var userPassword = 'User123!';
   var userHashed = hashPassword(userPassword);
 
-  userSheet.appendRow([
-    2,
-    'user',
-    userHashed.hash,
-    userHashed.salt,
-    'user',
-    'Regular User',
-    'active',
-    0,
-    '',
-    new Date(),
-    new Date()
-  ]);
+  // Use batch insert for faster performance
+  var users = [
+    [1, 'admin', hashed.hash, hashed.salt, 'admin', 'System Administrator', 'active', 0, '', new Date(), new Date()],
+    [2, 'user', userHashed.hash, userHashed.salt, 'user', 'Regular User', 'active', 0, '', new Date(), new Date()]
+  ];
+
+  userSheet.getRange(2, 1, users.length, users[0].length).setValues(users);
 }
 
 /**
@@ -703,7 +682,8 @@ function createDefaultAccounts() {
     [43, '6-112', 'Beban Lain-lain', 'Expense', 'Other Expense', '6-000', 'Beban operasional lainnya', true, new Date(), 'system']
   ];
 
-  for (var i = 0; i < accounts.length; i++) {
-    accountSheet.appendRow(accounts[i]);
+  // Use batch insert for much faster performance
+  if (accounts.length > 0) {
+    accountSheet.getRange(2, 1, accounts.length, accounts[0].length).setValues(accounts);
   }
 }
