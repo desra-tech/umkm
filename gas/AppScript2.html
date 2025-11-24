@@ -1,0 +1,599 @@
+<script>
+// ==========================================
+// REPORTS - BALANCE SHEET
+// ==========================================
+async function loadBalanceSheet() {
+  const page = document.getElementById('pageBalanceSheet');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>Laporan Posisi Keuangan (Neraca)</h2>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Per Tanggal</label>
+          <input type="date" id="bsAsOfDate" value="${new Date().toISOString().split('T')[0]}">
+        </div>
+        <div class="form-group">
+          <button onclick="generateBalanceSheet()" class="btn btn-sm" style="margin-top: 25px;">Generate</button>
+        </div>
+      </div>
+    </div>
+    <div id="reportContent"></div>
+  `;
+
+  generateBalanceSheet();
+}
+
+async function generateBalanceSheet() {
+  const asOfDate = document.getElementById('bsAsOfDate').value;
+
+  try {
+    const result = await apiCall('getBalanceSheet', { asOfDate });
+    if (result.success) {
+      const data = result.data;
+      const reportContent = document.getElementById('reportContent');
+
+      reportContent.innerHTML = `
+        <div class="report-section">
+          <h3>ASET</h3>
+          ${data.assets.map(a => `
+            <div class="report-row">
+              <span>${a.account.name}</span>
+              <span>${formatCurrency(a.amount)}</span>
+            </div>
+          `).join('')}
+          <div class="report-row subtotal">
+            <span>Total Aset</span>
+            <span>${formatCurrency(data.totalAssets)}</span>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <h3>KEWAJIBAN</h3>
+          ${data.liabilities.map(l => `
+            <div class="report-row">
+              <span>${l.account.name}</span>
+              <span>${formatCurrency(l.amount)}</span>
+            </div>
+          `).join('')}
+          <div class="report-row subtotal">
+            <span>Total Kewajiban</span>
+            <span>${formatCurrency(data.totalLiabilities)}</span>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <h3>EKUITAS</h3>
+          ${data.equity.map(e => `
+            <div class="report-row">
+              <span>${e.account.name}</span>
+              <span>${formatCurrency(e.amount)}</span>
+            </div>
+          `).join('')}
+          <div class="report-row">
+            <span>Laba Bersih Periode Berjalan</span>
+            <span>${formatCurrency(data.netIncome)}</span>
+          </div>
+          <div class="report-row subtotal">
+            <span>Total Ekuitas</span>
+            <span>${formatCurrency(data.totalEquity)}</span>
+          </div>
+        </div>
+
+        <div class="report-row total">
+          <span>TOTAL KEWAJIBAN DAN EKUITAS</span>
+          <span>${formatCurrency(data.totalLiabilitiesAndEquity)}</span>
+        </div>
+      `;
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+// ==========================================
+// REPORTS - CASH FLOW
+// ==========================================
+async function loadCashFlow() {
+  const page = document.getElementById('pageCashFlow');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>Laporan Arus Kas</h2>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-row">
+        <div class="form-group">
+          <label>Dari Tanggal</label>
+          <input type="date" id="cfStartDate" value="${new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0]}">
+        </div>
+        <div class="form-group">
+          <label>Sampai Tanggal</label>
+          <input type="date" id="cfEndDate" value="${new Date().toISOString().split('T')[0]}">
+        </div>
+        <div class="form-group">
+          <button onclick="generateCashFlow()" class="btn btn-sm" style="margin-top: 25px;">Generate</button>
+        </div>
+      </div>
+    </div>
+    <div id="reportContent"></div>
+  `;
+
+  generateCashFlow();
+}
+
+async function generateCashFlow() {
+  const startDate = document.getElementById('cfStartDate').value;
+  const endDate = document.getElementById('cfEndDate').value;
+
+  try {
+    const result = await apiCall('getCashFlow', { startDate, endDate });
+    if (result.success) {
+      const data = result.data;
+      const reportContent = document.getElementById('reportContent');
+
+      reportContent.innerHTML = `
+        <div class="report-row subtotal">
+          <span>Saldo Kas Awal</span>
+          <span>${formatCurrency(data.beginningCash)}</span>
+        </div>
+
+        <div class="report-section">
+          <h3>ARUS KAS DARI AKTIVITAS OPERASI</h3>
+          ${data.operating.items.map(item => `
+            <div class="report-row">
+              <span>${item.description}</span>
+              <span>${formatCurrency(item.amount)}</span>
+            </div>
+          `).join('')}
+          <div class="report-row subtotal">
+            <span>Kas Bersih dari Aktivitas Operasi</span>
+            <span>${formatCurrency(data.operating.total)}</span>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <h3>ARUS KAS DARI AKTIVITAS INVESTASI</h3>
+          ${data.investing.items.map(item => `
+            <div class="report-row">
+              <span>${item.description}</span>
+              <span>${formatCurrency(item.amount)}</span>
+            </div>
+          `).join('')}
+          <div class="report-row subtotal">
+            <span>Kas Bersih dari Aktivitas Investasi</span>
+            <span>${formatCurrency(data.investing.total)}</span>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <h3>ARUS KAS DARI AKTIVITAS PENDANAAN</h3>
+          ${data.financing.items.map(item => `
+            <div class="report-row">
+              <span>${item.description}</span>
+              <span>${formatCurrency(item.amount)}</span>
+            </div>
+          `).join('')}
+          <div class="report-row subtotal">
+            <span>Kas Bersih dari Aktivitas Pendanaan</span>
+            <span>${formatCurrency(data.financing.total)}</span>
+          </div>
+        </div>
+
+        <div class="report-row subtotal">
+          <span>Kenaikan (Penurunan) Bersih Kas</span>
+          <span>${formatCurrency(data.netCashFlow)}</span>
+        </div>
+
+        <div class="report-row total">
+          <span>SALDO KAS AKHIR</span>
+          <span>${formatCurrency(data.endingCash)}</span>
+        </div>
+      `;
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+// ==========================================
+// POS (POINT OF SALE)
+// ==========================================
+let cartItems = [];
+
+async function loadPOS() {
+  const page = document.getElementById('pagePOS');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>🛒 Point of Sale (Kasir)</h2>
+    </div>
+    <div class="pos-grid">
+      <div>
+        <h3>Produk</h3>
+        <div class="product-grid" id="productGrid"></div>
+      </div>
+      <div>
+        <h3>Keranjang</h3>
+        <div id="cartContainer"></div>
+        <div class="cart-total" id="cartTotal">Total: Rp 0</div>
+        <button onclick="checkoutSale()" class="btn btn-success mt-20">Checkout</button>
+        <button onclick="clearCart()" class="btn btn-secondary mt-20">Clear</button>
+      </div>
+    </div>
+  `;
+
+  try {
+    const result = await apiCall('getProducts');
+    if (result.success) {
+      const productGrid = document.getElementById('productGrid');
+      productGrid.innerHTML = result.data
+        .filter(p => p.isActive)
+        .map(prod => `
+          <div class="product-card" onclick='addToCart(${JSON.stringify(prod).replace(/'/g, "&#39;")})'>
+            <h4>${prod.name}</h4>
+            <div class="price">${formatCurrency(prod.sellingPrice)}</div>
+            <div style="font-size: 12px; color: #999; margin-top: 5px;">Stok: ${prod.currentStock}</div>
+          </div>
+        `).join('');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+
+  updateCart();
+}
+
+function addToCart(product) {
+  const existing = cartItems.find(item => item.productId === product.id);
+  if (existing) {
+    if (existing.quantity < product.currentStock) {
+      existing.quantity++;
+    } else {
+      showAlert('Stok tidak mencukupi', 'error');
+      return;
+    }
+  } else {
+    if (product.currentStock > 0) {
+      cartItems.push({
+        productId: product.id,
+        name: product.name,
+        price: product.sellingPrice,
+        quantity: 1,
+        maxStock: product.currentStock
+      });
+    } else {
+      showAlert('Stok habis', 'error');
+      return;
+    }
+  }
+  updateCart();
+}
+
+function removeFromCart(productId) {
+  cartItems = cartItems.filter(item => item.productId !== productId);
+  updateCart();
+}
+
+function updateCartQuantity(productId, delta) {
+  const item = cartItems.find(i => i.productId === productId);
+  if (item) {
+    item.quantity += delta;
+    if (item.quantity <= 0) {
+      removeFromCart(productId);
+    } else if (item.quantity > item.maxStock) {
+      item.quantity = item.maxStock;
+      showAlert('Stok tidak mencukupi', 'error');
+    }
+    updateCart();
+  }
+}
+
+function updateCart() {
+  const cartContainer = document.getElementById('cartContainer');
+  if (!cartContainer) return;
+
+  if (cartItems.length === 0) {
+    cartContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Keranjang kosong</p>';
+    document.getElementById('cartTotal').textContent = 'Total: Rp 0';
+    return;
+  }
+
+  let total = 0;
+  cartContainer.innerHTML = cartItems.map(item => {
+    const subtotal = item.quantity * item.price;
+    total += subtotal;
+    return `
+      <div class="cart-item">
+        <div>
+          <strong>${item.name}</strong><br>
+          <small>${formatCurrency(item.price)} × ${item.quantity}</small>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button onclick="updateCartQuantity(${item.productId}, -1)" class="btn btn-sm">−</button>
+          <span style="min-width: 30px; text-align: center;">${item.quantity}</span>
+          <button onclick="updateCartQuantity(${item.productId}, 1)" class="btn btn-sm">+</button>
+          <button onclick="removeFromCart(${item.productId})" class="btn btn-sm btn-danger">×</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('cartTotal').textContent = 'Total: ' + formatCurrency(total);
+}
+
+function clearCart() {
+  if (confirm('Kosongkan keranjang?')) {
+    cartItems = [];
+    updateCart();
+  }
+}
+
+async function checkoutSale() {
+  if (cartItems.length === 0) {
+    showAlert('Keranjang kosong', 'error');
+    return;
+  }
+
+  const modal = createModal('Checkout', `
+    <div class="form-group">
+      <label>Pelanggan (Optional)</label>
+      <input type="text" id="saleCustomerId" placeholder="ID Pelanggan">
+    </div>
+    <div class="form-group">
+      <label>Metode Pembayaran</label>
+      <select id="salePaymentMethod">
+        <option value="Cash">Tunai</option>
+        <option value="Bank">Transfer Bank</option>
+        <option value="Credit">Kredit</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Catatan</label>
+      <textarea id="saleNotes" rows="3"></textarea>
+    </div>
+    <div class="report-row total">
+      <span>TOTAL</span>
+      <span>${formatCurrency(cartItems.reduce((sum, item) => sum + (item.quantity * item.price), 0))}</span>
+    </div>
+    <button onclick="processSale()" class="btn btn-success">Proses Pembayaran</button>
+  `);
+  showModal(modal);
+}
+
+async function processSale() {
+  const params = {
+    date: new Date().toISOString(),
+    customerId: document.getElementById('saleCustomerId').value,
+    paymentMethod: document.getElementById('salePaymentMethod').value,
+    notes: document.getElementById('saleNotes').value,
+    items: cartItems
+  };
+
+  try {
+    const result = await apiCall('createSale', params);
+    if (result.success) {
+      showAlert('Penjualan berhasil! No: ' + result.transactionNumber, 'success');
+      closeModal();
+      cartItems = [];
+      loadPOS();
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+// ==========================================
+// INVENTORY
+// ==========================================
+async function loadInventory() {
+  const page = document.getElementById('pageInventory');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>Manajemen Persediaan</h2>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Produk ID</th>
+            <th>Tipe</th>
+            <th>Kuantitas</th>
+            <th>Harga Satuan</th>
+            <th>Total</th>
+            <th>Referensi</th>
+            <th>Catatan</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  `;
+
+  try {
+    const result = await apiCall('getInventory');
+    if (result.success) {
+      const tbody = page.querySelector('tbody');
+      tbody.innerHTML = result.data.map(inv => `
+        <tr>
+          <td>${formatDate(inv.date)}</td>
+          <td>${inv.productId}</td>
+          <td>${inv.type === 'in' ? '📥 Masuk' : '📤 Keluar'}</td>
+          <td>${inv.quantity}</td>
+          <td>${formatCurrency(inv.unitPrice)}</td>
+          <td>${formatCurrency(inv.total)}</td>
+          <td>${inv.reference || '-'}</td>
+          <td>${inv.notes || '-'}</td>
+        </tr>
+      `).join('');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+// ==========================================
+// RECEIVABLES (PIUTANG)
+// ==========================================
+async function loadReceivables() {
+  const page = document.getElementById('pageReceivables');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>Piutang Usaha</h2>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>No. Invoice</th>
+            <th>Pelanggan ID</th>
+            <th>Tanggal</th>
+            <th>Jatuh Tempo</th>
+            <th>Jumlah</th>
+            <th>Terbayar</th>
+            <th>Saldo</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  `;
+
+  try {
+    const result = await apiCall('getReceivables');
+    if (result.success) {
+      const tbody = page.querySelector('tbody');
+      tbody.innerHTML = result.data.map(rec => `
+        <tr>
+          <td>${rec.invoiceNumber}</td>
+          <td>${rec.customerId}</td>
+          <td>${formatDate(rec.date)}</td>
+          <td>${formatDate(rec.dueDate)}</td>
+          <td>${formatCurrency(rec.amount)}</td>
+          <td>${formatCurrency(rec.paidAmount)}</td>
+          <td>${formatCurrency(rec.balance)}</td>
+          <td>${rec.status === 'paid' ? '✅ Lunas' : rec.status === 'partial' ? '⏳ Sebagian' : '❌ Belum Bayar'}</td>
+          <td class="action-buttons">
+            ${rec.status !== 'paid' ? `<button onclick="showPaymentModal(${rec.id}, 'receivable', ${rec.balance})" class="btn btn-sm btn-success">Bayar</button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+// ==========================================
+// PAYABLES (UTANG)
+// ==========================================
+async function loadPayables() {
+  const page = document.getElementById('pagePayables');
+  page.innerHTML = `
+    <div class="page-header">
+      <h2>Utang Usaha</h2>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>No. Bill</th>
+            <th>Pemasok ID</th>
+            <th>Tanggal</th>
+            <th>Jatuh Tempo</th>
+            <th>Jumlah</th>
+            <th>Terbayar</th>
+            <th>Saldo</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  `;
+
+  try {
+    const result = await apiCall('getPayables');
+    if (result.success) {
+      const tbody = page.querySelector('tbody');
+      tbody.innerHTML = result.data.map(pay => `
+        <tr>
+          <td>${pay.billNumber}</td>
+          <td>${pay.supplierId}</td>
+          <td>${formatDate(pay.date)}</td>
+          <td>${formatDate(pay.dueDate)}</td>
+          <td>${formatCurrency(pay.amount)}</td>
+          <td>${formatCurrency(pay.paidAmount)}</td>
+          <td>${formatCurrency(pay.balance)}</td>
+          <td>${pay.status === 'paid' ? '✅ Lunas' : pay.status === 'partial' ? '⏳ Sebagian' : '❌ Belum Bayar'}</td>
+          <td class="action-buttons">
+            ${pay.status !== 'paid' ? `<button onclick="showPaymentModal(${pay.id}, 'payable', ${pay.balance})" class="btn btn-sm btn-success">Bayar</button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+
+function showPaymentModal(id, type, balance) {
+  const modal = createModal('Catat Pembayaran', `
+    <div class="form-group">
+      <label>Jumlah Bayar *</label>
+      <input type="number" id="paymentAmount" value="${balance}" max="${balance}" required>
+      <small>Saldo: ${formatCurrency(balance)}</small>
+    </div>
+    <div class="form-group">
+      <label>Tanggal Bayar</label>
+      <input type="date" id="paymentDate" value="${new Date().toISOString().split('T')[0]}">
+    </div>
+    <div class="form-group">
+      <label>Metode Pembayaran</label>
+      <select id="paymentMethod">
+        <option value="Cash">Tunai</option>
+        <option value="Bank">Transfer Bank</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Akun ID</label>
+      <input type="text" id="paymentAccountId" placeholder="ID Akun Kas/Bank">
+    </div>
+    <button onclick="recordPaymentAction(${id}, '${type}')" class="btn btn-success">Simpan Pembayaran</button>
+  `);
+  showModal(modal);
+}
+
+async function recordPaymentAction(id, type) {
+  const params = {
+    id: id,
+    type: type,
+    amount: document.getElementById('paymentAmount').value,
+    date: document.getElementById('paymentDate').value,
+    paymentMethod: document.getElementById('paymentMethod').value,
+    accountId: document.getElementById('paymentAccountId').value
+  };
+
+  try {
+    const result = await apiCall('recordPayment', params);
+    if (result.success) {
+      showAlert(result.message, 'success');
+      closeModal();
+      if (type === 'receivable') {
+        loadReceivables();
+      } else {
+        loadPayables();
+      }
+    } else {
+      showAlert(result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error: ' + error.message, 'error');
+  }
+}
+</script>
