@@ -15,6 +15,15 @@ function getIncomeStatement(params) {
     var txSheet = ss.getSheetByName(CONFIG.SHEET_NAMES.TRANSACTIONS);
     var accSheet = ss.getSheetByName(CONFIG.SHEET_NAMES.ACCOUNTS);
 
+    // Check if sheets exist
+    if (!txSheet || !accSheet) {
+      Logger.log('Sheets not found. Please run setupDatabase() first.');
+      return {
+        success: false,
+        error: 'Database not initialized. Please run setupDatabase() function in Apps Script.'
+      };
+    }
+
     var txData = txSheet.getDataRange().getValues();
     var accData = accSheet.getDataRange().getValues();
 
@@ -138,6 +147,15 @@ function getBalanceSheet(params) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var txSheet = ss.getSheetByName(CONFIG.SHEET_NAMES.TRANSACTIONS);
     var accSheet = ss.getSheetByName(CONFIG.SHEET_NAMES.ACCOUNTS);
+
+    // Check if sheets exist
+    if (!txSheet || !accSheet) {
+      Logger.log('Sheets not found. Please run setupDatabase() first.');
+      return {
+        success: false,
+        error: 'Database not initialized. Please run setupDatabase() function in Apps Script.'
+      };
+    }
 
     var txData = txSheet.getDataRange().getValues();
     var accData = accSheet.getDataRange().getValues();
@@ -280,6 +298,15 @@ function getCashFlow(params) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var txSheet = ss.getSheetByName(CONFIG.SHEET_NAMES.TRANSACTIONS);
     var accSheet = ss.getSheetByName(CONFIG.SHEET_NAMES.ACCOUNTS);
+
+    // Check if sheets exist
+    if (!txSheet || !accSheet) {
+      Logger.log('Sheets not found. Please run setupDatabase() first.');
+      return {
+        success: false,
+        error: 'Database not initialized. Please run setupDatabase() function in Apps Script.'
+      };
+    }
 
     var txData = txSheet.getDataRange().getValues();
     var accData = accSheet.getDataRange().getValues();
